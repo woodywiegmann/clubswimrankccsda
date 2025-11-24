@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>June Wiegmann - Individual Swimmer Analytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --primary: #005f73;
+            --secondary: #0a9396;
+            --accent: #ee9b00;
+            --light: #e9d8a6;
+            --dark: #001219;
+            --gold: #FFD700;
+            --silver: #C0C0C0;
+            --bronze: #CD7F32;
+            --light-gold: #FFF8DC;
+            --light-silver: #F5F5F5;
+            --light-bronze: #E6C19A;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--dark);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            padding: 10px 15px;
+            background: var(--primary);
+            border-bottom: 2px solid var(--secondary);
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px 6px 0 0;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            border-bottom: none;
+        }
+
+        .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-tab.active {
+            background: var(--dark);
+            border-color: var(--secondary);
+            color: var(--light);
+        }
+
+        .premium-badge {
+            font-size: 0.7rem;
+            margin-left: 4px;
+            opacity: 0.9;
+        }
+
+        /* Demo Banner */
+        .demo-banner {
+            background: linear-gradient(135deg, var(--accent), #ffb84d);
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--gold);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .demo-banner h2 {
+            font-size: 1.3rem;
+            color: var(--dark);
+            font-weight: 800;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .demo-banner p {
+            font-size: 0.9rem;
+            color: var(--dark);
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .demo-banner a {
+            color: var(--primary);
+            text-decoration: underline;
+            font-weight: 700;
+        }
+
+        .demo-banner a:hover {
+            color: var(--dark);
+        }
+
+        /* Header Area */
+        header {
+            background: var(--primary);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        header .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            color: var(--light);
+        }
+
+        /* Portal Button */
+        .portal-button-container {
+            padding: 15px 20px;
+            background: #002833;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .portal-button {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .portal-button:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        .portal-button:active {
+            transform: translateY(0);
+        }
+
+        /* Main Content */
+        .content-container {
+            flex-grow: 1;
+            padding: 20px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .swimmer-stats {
+            display: grid;
+            gap: 20px;
+        }
+
+        .stat-section {
+            background: #002833;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .stat-section h3 {
+            color: var(--accent);
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 10px;
+        }
+
+        /* Summary Stats */
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: var(--secondary);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .summary-card h4 {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .summary-card .value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--light);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px 20px 60px 20px;
+            margin-bottom: 20px;
+            position: relative;
+            height: 400px;
+            overflow: visible;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .chart-title {
+            color: var(--dark);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .stroke-potential {
+            background: var(--accent);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .meet-times-table {
+            width: 100%;
+            background: white;
+            color: var(--dark);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .meet-times-table th {
+            background: var(--primary);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 700;
+        }
+
+        .meet-times-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .meet-times-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .meet-times-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .time-cell {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .best-time {
+            background: var(--light-gold);
+            font-weight: 800;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 0.8rem;
+            opacity: 0.6;
+            flex-shrink: 0;
+        }
+
+        /* Unavailable Modal */
+        .unavailable-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .unavailable-modal.active {
+            display: flex;
+        }
+
+        .unavailable-content {
+            background: var(--dark);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            border: 2px solid var(--accent);
+        }
+
+        .unavailable-content h3 {
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+
+        .unavailable-content p {
+            font-size: 1rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .close-unavailable {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .close-unavailable:hover {
+            background: var(--secondary);
+        }
+
+        .data-note {
+            background: rgba(255, 193, 7, 0.2);
+            border-left: 4px solid var(--accent);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            color: var(--light);
+        }
+
+        .data-note strong {
+            color: var(--accent);
+        }
+
+        /* Performance Categories */
+        .performance-categories {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .performance-categories {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .category-card {
+            background: #002833;
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            border: 3px solid transparent;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+        }
+
+        .category-card.stroke-potential {
+            border-color: var(--gold);
+        }
+
+        .category-card.fundamentals {
+            border-color: var(--secondary);
+        }
+
+        .category-card.power {
+            border-color: var(--gold);
+        }
+
+        .category-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            margin-bottom: 15px;
+            color: var(--light);
+        }
+
+        .category-grade {
+            font-size: 4rem;
+            font-weight: 800;
+            margin: 10px 0;
+            line-height: 1;
+        }
+
+        .category-grade.a-plus {
+            color: var(--gold);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .category-grade.b-minus {
+            color: var(--secondary);
+        }
+
+        .category-grade.b {
+            color: var(--secondary);
+        }
+
+        .category-description {
+            font-size: 0.85rem;
+            color: var(--light);
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-tabs">
+        <a href="index.html" class="nav-tab">Home</a>
+        <a href="analytics.html" class="nav-tab active">Individual Swimmer Analytics <span class="premium-badge">🔒</span></a>
+        <a href="rankings.html" class="nav-tab">Full Rankings <span class="premium-badge">🔒</span></a>
+        <a href="recruiting.html" class="nav-tab">Recruiting / Scouts <span class="premium-badge">🔒</span></a>
+    </nav>
+
+    <div class="demo-banner">
+        <h2>🔒 Premium Feature</h2>
+        <p>This is a demo page. <a href="mailto:QuantitativeGreasing@gmail.com?subject=Subscription Request&body=I want to subscribe to ClubSwimRank.%0D%0A%0D%0ADo you want the site personalized for your team preference? (Yes/No): ">Subscribe by emailing us</a> to access personalized swimmer analytics and advanced features.</p>
+    </div>
+
+    <header>
+        <h1>June Wiegmann</h1>
+        <p class="subtitle">Columbia • 8 & Under</p>
+    </header>
+
+    <div class="portal-button-container">
+        <button class="portal-button" onclick="showUnavailable()">SwimL Portal</button>
+    </div>
+
+    <div class="content-container">
+        <!-- Performance Categories -->
+        <div class="performance-categories">
+            <div class="category-card stroke-potential">
+                <div class="category-label">Stroke Potential</div>
+                <div class="category-grade a-plus" id="strokePotentialGrade">A+</div>
+                <div class="category-description">Improvement potential based on proprietary algorithm</div>
+            </div>
+            <div class="category-card fundamentals">
+                <div class="category-label">Fundamentals / Technicals</div>
+                <div class="category-grade b" id="fundamentalsGrade">B</div>
+                <div class="category-description">Technique and form consistency across all strokes</div>
+            </div>
+            <div class="category-card power">
+                <div class="category-label">Power / Strength</div>
+                <div class="category-grade a-plus" id="powerGrade">A+</div>
+                <div class="category-description">Physical strength and power output</div>
+            </div>
+        </div>
+
+        <div class="summary-stats">
+            <div class="summary-card">
+                <h4>CCSDA Current Ranks</h4>
+                <div class="value" style="font-size: 1.1rem; line-height: 1.8; text-align: left; padding-left: 10px;">
+                    8&U Girls<br>
+                    <br>
+                    Free: 1st<br>
+                    Back: 3rd<br>
+                    Butter: 4th
+                </div>
+            </div>
+        </div>
+
+        <!-- Stroke Potential Scores -->
+        <div class="stat-section">
+            <h3>Stroke Potential Scores</h3>
+            <table class="meet-times-table" style="margin-top: 0;">
+                <thead>
+                    <tr>
+                        <th>Stroke</th>
+                        <th>Potential Score</th>
+                    </tr>
+                </thead>
+                <tbody id="potentialScoresBody">
+                    <!-- Rows will be dynamically generated -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="swimmer-stats">
+            <!-- Freestyle Section -->
+            <div class="stat-section">
+                <h3>25 SC Meter Freestyle</h3>
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">Freestyle Times by Meet</div>
+                    </div>
+                    <canvas id="freestyleChart"></canvas>
+                </div>
+                <table class="meet-times-table">
+                    <thead>
+                        <tr>
+                            <th>Meet</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Rank</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="freestyleTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Backstroke Section -->
+            <div class="stat-section">
+                <h3>25 SC Meter Backstroke</h3>
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">Backstroke Times by Meet</div>
+                    </div>
+                    <canvas id="backstrokeChart"></canvas>
+                </div>
+                <table class="meet-times-table">
+                    <thead>
+                        <tr>
+                            <th>Meet</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Rank</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="backstrokeTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Butterfly Section -->
+            <div class="stat-section">
+                <h3>25 SC Meter Butterfly</h3>
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">Butterfly Times by Meet</div>
+                    </div>
+                    <canvas id="butterflyChart"></canvas>
+                </div>
+                <table class="meet-times-table">
+                    <thead>
+                        <tr>
+                            <th>Meet</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Rank</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="butterflyTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Insights -->
+            <div class="stat-section">
+                <h3>Insights</h3>
+                <div style="color: var(--light); line-height: 1.8; padding: 10px;">
+                    <p style="font-size: 1.1rem; margin-bottom: 20px;">Inconsistent times due to fundamental/technical inconsistency (take-off, breathing), but her raw power indicates she can be a tremendous talent. Improvement trajectory over the season was exceptional.</p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
+                        <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid var(--gold);">
+                            <div style="font-weight: 700; color: var(--accent); margin-bottom: 5px;">Potential:</div>
+                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--gold);">A+</div>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid var(--secondary);">
+                            <div style="font-weight: 700; color: var(--accent); margin-bottom: 5px;">Fundamentals/Technicals:</div>
+                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--secondary);">B</div>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid var(--gold);">
+                            <div style="font-weight: 700; color: var(--accent); margin-bottom: 5px;">Power/Strength:</div>
+                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--gold);">A+</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        CCSDA Data Visualization • Demo Analytics Page
+    </footer>
+
+    <!-- Unavailable Modal -->
+    <div id="unavailableModal" class="unavailable-modal" onclick="closeUnavailable(event)">
+        <div class="unavailable-content" onclick="event.stopPropagation()">
+            <h3>Unavailable</h3>
+            <p>The SwimL Portal feature is currently unavailable. Please check back later or contact support for more information.</p>
+            <button class="close-unavailable" onclick="closeUnavailable(event)">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // Sample data structure - will be populated from full meet data parsing
+        // Format: { event: string, times: [{ meet: string, date: string, time: number, rank: number, dq: boolean }] }
+        const swimmerData = {
+            "25 SC Meter Freestyle": {
+                times: [
+                    { meet: "Columbia vs Kenwood 2025", date: "7/17/2025", time: 16.71, rank: 1, dq: false },
+                    { meet: "Columbia vs Army Navy", date: "7/15/2025", time: 17.12, rank: 2, dq: false },
+                    { meet: "WGCC vs Columbia", date: "7/8/2025", time: 17.45, rank: 3, dq: false },
+                    { meet: "Congo vs. Washington Golf", date: "7/15/2025", time: 16.89, rank: 1, dq: false },
+                    { meet: "2025 Division A Championships", date: "7/22/2025", time: 16.95, rank: 2, dq: false }
+                ],
+                medianTime: 18.50, // Median time for all swimmers in this event
+                bestTime: 16.71,
+                worstTime: 17.45
+            },
+            "25 SC Meter Backstroke": {
+                times: [
+                    { meet: "Columbia vs Army Navy", date: "7/15/2025", time: 22.88, rank: 3, dq: false },
+                    { meet: "Columbia vs Kenwood 2025", date: "7/17/2025", time: 23.15, rank: 4, dq: false },
+                    { meet: "WGCC vs Columbia", date: "7/8/2025", time: 23.42, rank: 5, dq: false },
+                    { meet: "2025 Division A Championships", date: "7/22/2025", time: 23.08, rank: 3, dq: false }
+                ],
+                medianTime: 24.50, // Median time for all swimmers in this event
+                bestTime: 22.88,
+                worstTime: 23.42
+            },
+            "25 SC Meter Butterfly": {
+                times: [
+                    { meet: "Columbia vs Kenwood 2025", date: "7/17/2025", time: 21.85, rank: 4, dq: false },
+                    { meet: "Columbia vs Army Navy", date: "7/15/2025", time: 22.12, rank: 5, dq: false },
+                    { meet: "WGCC vs Columbia", date: "7/8/2025", time: 22.45, rank: 6, dq: false },
+                    { meet: "Columbia v Edgemoor", date: "7/1/2025", time: 22.28, rank: 5, dq: false },
+                    { meet: "2025 Division A Championships", date: "7/22/2025", time: 21.92, rank: 4, dq: false }
+                ],
+                medianTime: 23.00, // Median time for all swimmers in this event
+                bestTime: 21.85,
+                worstTime: 22.45
+            },
+        };
+
+        // Calculate Stroke Potential
+        // Formula: (lowest time / median time) * (gap between lowest and highest non-DQ time)
+        function calculateStrokePotential(eventData) {
+            const validTimes = eventData.times.filter(t => !t.dq).map(t => t.time);
+            if (validTimes.length === 0) return 0;
+            
+            const lowestTime = Math.min(...validTimes);
+            const highestTime = Math.max(...validTimes);
+            const timeGap = highestTime - lowestTime;
+            
+            // Relative performance to median (lower is better, so we invert)
+            const relativeToMedian = lowestTime / eventData.medianTime;
+            
+            // Stroke Potential = relative performance * time gap
+            // Higher potential = more room for improvement
+            const strokePotential = relativeToMedian * timeGap;
+            
+            // Multiply by 150 as requested
+            return (strokePotential * 150).toFixed(2);
+        }
+
+        // Create chart for an event
+        function createChart(canvasId, eventData, eventName) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            // Shorten meet names very aggressively for chart display
+            const meetNames = eventData.times.map(t => {
+                let name = t.meet;
+                // Remove year
+                name = name.replace(/2025\s+/g, '');
+                
+                // Team abbreviations
+                const teamAbbr = {
+                    'Columbia': 'Col',
+                    'Washington Golf': 'WG',
+                    'WGCC': 'WG',
+                    'Army Navy': 'AN',
+                    'Kenwood': 'KE',
+                    'Edgemoor': 'Edge',
+                    'Avenel': 'Ave',
+                    'Bethesda': 'Beth',
+                    'Chevy Chase': 'Chevy',
+                    'Congressional': 'Cong',
+                    'Manor': 'Man',
+                    'Norbeck': 'Nor'
+                };
+                
+                // Replace team names with abbreviations
+                Object.keys(teamAbbr).forEach(full => {
+                    const regex = new RegExp(full.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+                    name = name.replace(regex, teamAbbr[full]);
+                });
+                
+                // Handle "vs" format
+                name = name.replace(/\s+vs\s+/gi, ' v ');
+                name = name.replace(/\s+v\s+/gi, ' v ');
+                
+                // Special cases
+                name = name.replace(/Division\s+A\s+Championships?/gi, 'Div A');
+                name = name.replace(/Congo\s+v\s+/gi, 'Congo v ');
+                
+                // Extract just team abbreviations if it's a vs format
+                const vsMatch = name.match(/(\w+)\s+v\s+(\w+)/i);
+                if (vsMatch) {
+                    name = vsMatch[1].substring(0, 4) + ' v ' + vsMatch[2].substring(0, 4);
+                }
+                
+                // Final truncation - max 8 characters for vertical labels
+                if (name.length > 8) {
+                    name = name.substring(0, 7) + '.';
+                }
+                
+                return name;
+            });
+            const times = eventData.times.map(t => t.time);
+            const bestTime = eventData.bestTime;
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: meetNames,
+                    datasets: [
+                        {
+                            label: 'Time (seconds)',
+                            data: times,
+                            borderColor: 'rgb(10, 147, 150)',
+                            backgroundColor: 'rgba(10, 147, 150, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        },
+                        {
+                            label: 'Best Time',
+                            data: times.map(() => bestTime),
+                            borderColor: 'rgb(255, 215, 0)',
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            bottom: 30,
+                            left: 10,
+                            right: 10
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#001219',
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += context.parsed.y.toFixed(2) + 's';
+                                    if (context.datasetIndex === 0) {
+                                        const rank = eventData.times[context.dataIndex].rank;
+                                        label += ' (Rank: ' + rank + ')';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            reverse: false,
+                            ticks: {
+                                color: '#001219',
+                                callback: function(value) {
+                                    return value.toFixed(2) + 's';
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#001219',
+                                maxRotation: 90,
+                                minRotation: 90,
+                                font: {
+                                    size: 7
+                                },
+                                padding: 10,
+                                autoSkip: false,
+                                callback: function(value, index) {
+                                    const label = this.getLabelForValue(value);
+                                    // Ensure labels are very short
+                                    if (label && label.length > 8) {
+                                        return label.substring(0, 7) + '.';
+                                    }
+                                    return label;
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Populate table for an event
+        function populateTable(tableBodyId, eventData) {
+            const tbody = document.getElementById(tableBodyId);
+            tbody.innerHTML = '';
+            
+            // Sort by date (most recent first)
+            const sortedTimes = [...eventData.times].sort((a, b) => {
+                return new Date(b.date) - new Date(a.date);
+            });
+            
+            sortedTimes.forEach(swim => {
+                const row = document.createElement('tr');
+                const isBest = swim.time === eventData.bestTime;
+                row.className = isBest ? 'best-time' : '';
+                
+                row.innerHTML = `
+                    <td>${swim.meet}</td>
+                    <td>${swim.date}</td>
+                    <td class="time-cell">${swim.time.toFixed(2)}</td>
+                    <td>#${swim.rank}</td>
+                    <td>${swim.dq ? '<span style="color: red;">DQ</span>' : (isBest ? '<span style="color: #d4af37; font-weight: 700;">Best Time</span>' : '')}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Initialize all charts and tables
+        function initializeAnalytics() {
+            // Map of stroke names to data keys
+            const strokeMap = {
+                "Freestyle": "25 SC Meter Freestyle",
+                "Backstroke": "25 SC Meter Backstroke",
+                "Butterfly": "25 SC Meter Butterfly"
+            };
+            
+            // Set specific potential scores for June
+            const potentialScores = {
+                "Freestyle": "100",
+                "Backstroke": "98",
+                "Butterfly": "99"
+            };
+            
+            // Calculate average (aggregate potential score)
+            const scores = Object.values(potentialScores).map(s => parseFloat(s));
+            const averagePotential = (scores.reduce((sum, score) => sum + score, 0) / scores.length).toFixed(0);
+            
+            // Populate potential scores table dynamically
+            const tbody = document.getElementById('potentialScoresBody');
+            tbody.innerHTML = '';
+            
+            Object.keys(potentialScores).forEach(strokeName => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${strokeName}</strong></td>
+                    <td class="time-cell">${potentialScores[strokeName]}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Add total row with average and median comparison
+            const totalRow = document.createElement('tr');
+            totalRow.style.background = 'var(--light-gold)';
+            totalRow.style.borderTop = '2px solid var(--gold)';
+            totalRow.innerHTML = `
+                <td><strong>Potential Score</strong></td>
+                <td class="time-cell" style="font-size: 1.2rem; font-weight: 800;">
+                    ${averagePotential} <span style="font-size: 0.9rem; font-weight: 600; color: #666; margin-left: 10px;">(Median CCSDA Score: 34)</span>
+                </td>
+            `;
+            tbody.appendChild(totalRow);
+            
+            // Create charts
+            createChart('freestyleChart', swimmerData["25 SC Meter Freestyle"], "Freestyle");
+            createChart('backstrokeChart', swimmerData["25 SC Meter Backstroke"], "Backstroke");
+            createChart('butterflyChart', swimmerData["25 SC Meter Butterfly"], "Butterfly");
+            
+            // Populate tables
+            populateTable('freestyleTableBody', swimmerData["25 SC Meter Freestyle"]);
+            populateTable('backstrokeTableBody', swimmerData["25 SC Meter Backstroke"]);
+            populateTable('butterflyTableBody', swimmerData["25 SC Meter Butterfly"]);
+        }
+
+        function showUnavailable() {
+            document.getElementById('unavailableModal').classList.add('active');
+        }
+
+        function closeUnavailable(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            document.getElementById('unavailableModal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeUnavailable();
+            }
+        });
+
+        // Initialize on page load
+        window.onload = initializeAnalytics;
+    </script>
+</body>
+</html>
+

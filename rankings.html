@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Full Rankings - ClubSwimRank</title>
+    <style>
+        :root {
+            --primary: #005f73;
+            --secondary: #0a9396;
+            --accent: #ee9b00;
+            --light: #e9d8a6;
+            --dark: #001219;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--dark);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            padding: 10px 15px;
+            background: var(--primary);
+            border-bottom: 2px solid var(--secondary);
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px 6px 0 0;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            border-bottom: none;
+        }
+
+        .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-tab.active {
+            background: var(--dark);
+            border-color: var(--secondary);
+            color: var(--light);
+        }
+
+        .premium-badge {
+            font-size: 0.7rem;
+            margin-left: 4px;
+            opacity: 0.9;
+        }
+
+        .demo-banner {
+            background: linear-gradient(135deg, var(--accent), #ffb84d);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--gold);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .demo-banner h2 {
+            font-size: 1.5rem;
+            color: var(--dark);
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .demo-banner p {
+            font-size: 1rem;
+            color: var(--dark);
+            font-weight: 600;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .demo-banner a {
+            color: var(--primary);
+            text-decoration: underline;
+            font-weight: 700;
+        }
+
+        .demo-banner a:hover {
+            color: var(--dark);
+        }
+
+        .locked-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .lock-icon {
+            font-size: 8rem;
+            margin-bottom: 30px;
+            opacity: 0.8;
+        }
+
+        .locked-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--light);
+        }
+
+        .locked-content p {
+            font-size: 1.2rem;
+            color: var(--light);
+            opacity: 0.9;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 0.8rem;
+            opacity: 0.6;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-tabs">
+        <a href="index.html" class="nav-tab">Home</a>
+        <a href="analytics.html" class="nav-tab">Individual Swimmer Analytics <span class="premium-badge">🔒</span></a>
+        <a href="rankings.html" class="nav-tab active">Full Rankings <span class="premium-badge">🔒</span></a>
+        <a href="recruiting.html" class="nav-tab">Recruiting / Scouts <span class="premium-badge">🔒</span></a>
+    </nav>
+
+    <div class="demo-banner">
+        <h2>🔒 Premium Feature</h2>
+        <p><a href="mailto:QuantitativeGreasing@gmail.com?subject=Subscription Request&body=I want to subscribe to ClubSwimRank.%0D%0A%0D%0ADo you want the site personalized for your team preference? (Yes/No): ">Subscribe by emailing us</a> to access full rankings and advanced features.</p>
+        <p style="font-size: 0.9rem; margin-top: 10px;">Member pages will be personalized with your preferred club colors and news if desired.</p>
+    </div>
+
+    <div class="locked-content">
+        <div class="lock-icon">🔒</div>
+        <h1>Full Rankings</h1>
+        <p>This feature is available to subscribers. Subscribe to access complete league rankings for all events and swimmers.</p>
+    </div>
+
+    <footer>
+        ClubSwimRank • CCSDA Data Visualization
+    </footer>
+
+</body>
+</html>
+

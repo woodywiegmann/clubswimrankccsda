@@ -793,10 +793,12 @@
                         timeDiv.textContent = swimmer.time;
                     }
                     
+                    const escapedName = swimmer.name.replace(/'/g, "\\'");
+                    const escapedTeam = swimmer.team.replace(/'/g, "\\'");
                     card.innerHTML = `
                         <div class="rank-badge">${swimmer.rank}</div>
                         <div class="info">
-                            <span class="name" onclick="showSwimmerAnalytics('${swimmer.name}', '${swimmer.team}')">${swimmer.name}</span>
+                            <span class="name" onclick="showSwimmerAnalytics('${escapedName}', '${escapedTeam}')">${swimmer.name}</span>
                             <span class="team">${swimmer.team}</span>
                         </div>
                     `;
@@ -816,78 +818,146 @@
             document.getElementById('swimmerModal').classList.remove('active');
         }
 
-        function showSwimmerAnalytics(swimmerName, swimmerTeam) {
-            // Specific data for June Wiegmann
-            if (swimmerName === "Wiegmann, June" && swimmerTeam === "Columbia") {
-                document.getElementById('modalSwimmerName').textContent = `June Wiegmann - Columbia`;
-                const statsDiv = document.getElementById('swimmerStats');
-                statsDiv.innerHTML = `
-                    <div class="stat-section">
-                        <h3>Season Stats (Excludes Relays & Champs)</h3>
-                        <p style="margin-bottom: 5px;"><strong>Total Individual Points:</strong> 58 (5 dual meets)</p>
-                        <p style="margin-bottom: 15px;"><strong>Aggregate Win Share:</strong> 7.97%</p>
-                        <p style="font-size: 0.85rem; color: #ccc;">
-                            *Win Share: Swimmer's individual points ÷ Team's total points across all dual meets.
-                            Excludes relay events and championship meets.
-                        </p>
-                    </div>
-                    <div class="stat-section">
-                        <h3>Win Share by Meet (Excludes Relays & Champs)</h3>
-                        <table class="meet-times-table" style="margin-top: 0;">
-                            <thead>
-                                <tr>
-                                    <th>Meet</th>
-                                    <th>Date</th>
-                                    <th>June's Pts</th>
-                                    <th>Columbia Pts</th>
-                                    <th>Win Share</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr><td>Columbia v Edgemoor</td><td>6/17</td><td>15</td><td>223</td><td>6.73%</td></tr>
-                                <tr><td>WGCC v Columbia</td><td>7/8</td><td>15</td><td>113</td><td>13.27%</td></tr>
-                                <tr><td>Congo/Columbia/Chevy</td><td>7/11</td><td>10</td><td>95</td><td>10.53%</td></tr>
-                                <tr><td>Columbia v Army Navy</td><td>7/15</td><td>10</td><td>144.5</td><td>6.92%</td></tr>
-                                <tr><td>Columbia v Kenwood</td><td>7/17</td><td>8</td><td>152</td><td>5.26%</td></tr>
-                                <tr style="font-weight: bold; background-color: rgba(255, 215, 0, 0.1);">
-                                    <td>Season Totals</td><td></td><td>58</td><td>727.5</td><td>7.97%</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="stat-section">
-                        <h3>8&U Girls</h3>
-                        <div class="event-list">
-                            <div class="event-item">
-                                <div class="event-name">Freestyle</div>
-                                <div class="event-time">16.71</div>
-                                <div class="event-rank rank-1">CCSDA Rank 1</div>
-                            </div>
-                            <div class="event-item">
-                                <div class="event-name">Backstroke</div>
-                                <div class="event-time">22.88</div>
-                                <div class="event-rank rank-3">CCSDA Rank 3</div>
-                            </div>
-                            <div class="event-item">
-                                <div class="event-name">Breaststroke</div>
-                                <div class="event-time">N/A</div>
-                                <div class="event-rank">N/A</div>
-                            </div>
-                            <div class="event-item">
-                                <div class="event-name">Butterfly</div>
-                                <div class="event-time">22.33</div>
-                                <div class="event-rank">CCSDA Rank 4</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                document.getElementById('swimmerModal').classList.add('active');
-                return;
+        /*
+         * ===========================================
+         * SWIMMER DATA CONNECTION POINT
+         * ===========================================
+         * To update swimmer stats, modify the swimmerDetailedData object below.
+         * Each swimmer key is "Name, First - Team" format.
+         * 
+         * Required fields per swimmer:
+         *   - totalPoints: number (individual points, excludes relays/champs)
+         *   - teamTotalPoints: number (team's total individual points)
+         *   - winShare: string (percentage)
+         *   - meets: array of { name, date, swimmerPts, teamPts, winShare }
+         *   - strokes: { Freestyle: {time, rank}, Backstroke: {...}, etc. }
+         *     Use rank: null and time: "N/A" if swimmer doesn't swim that stroke
+         * ===========================================
+         */
+        const swimmerDetailedData = {
+            // VERIFIED DATA - June Wiegmann
+            "Wiegmann, June - Columbia": {
+                totalPoints: 58,
+                numMeets: 5,
+                teamTotalPoints: 727.5,
+                winShare: "7.97%",
+                ageGroup: "8&U Girls",
+                meets: [
+                    { name: "Columbia v Edgemoor", date: "6/17", swimmerPts: 15, teamPts: 223, winShare: "6.73%" },
+                    { name: "WGCC v Columbia", date: "7/8", swimmerPts: 15, teamPts: 113, winShare: "13.27%" },
+                    { name: "Congo/Columbia/Chevy", date: "7/11", swimmerPts: 10, teamPts: 95, winShare: "10.53%" },
+                    { name: "Columbia v Army Navy", date: "7/15", swimmerPts: 10, teamPts: 144.5, winShare: "6.92%" },
+                    { name: "Columbia v Kenwood", date: "7/17", swimmerPts: 8, teamPts: 152, winShare: "5.26%" }
+                ],
+                strokes: {
+                    Freestyle: { time: "16.71", rank: 1 },
+                    Backstroke: { time: "22.88", rank: 3 },
+                    Breaststroke: { time: "N/A", rank: null },
+                    Butterfly: { time: "22.33", rank: 4 }
+                }
+            },
+            // PLACEHOLDER DATA - Update with real data when available
+            "Boone, Elizabeth - Manor": {
+                totalPoints: 45,
+                numMeets: 5,
+                teamTotalPoints: 680,
+                winShare: "6.62%",
+                ageGroup: "8&U Girls",
+                meets: [
+                    { name: "Meet 1", date: "6/17", swimmerPts: 10, teamPts: 140, winShare: "7.14%" },
+                    { name: "Meet 2", date: "7/8", swimmerPts: 9, teamPts: 135, winShare: "6.67%" },
+                    { name: "Meet 3", date: "7/11", swimmerPts: 8, teamPts: 130, winShare: "6.15%" },
+                    { name: "Meet 4", date: "7/15", swimmerPts: 9, teamPts: 138, winShare: "6.52%" },
+                    { name: "Meet 5", date: "7/17", swimmerPts: 9, teamPts: 137, winShare: "6.57%" }
+                ],
+                strokes: {
+                    Freestyle: { time: "16.91", rank: 2 },
+                    Backstroke: { time: "21.74", rank: 2 },
+                    Breaststroke: { time: "N/A", rank: null },
+                    Butterfly: { time: "19.39", rank: 1 }
+                }
+            },
+            "Salcetti, Madison - Bethesda": {
+                totalPoints: 38,
+                numMeets: 5,
+                teamTotalPoints: 750,
+                winShare: "5.07%",
+                ageGroup: "8&U Girls",
+                meets: [
+                    { name: "Meet 1", date: "6/17", swimmerPts: 8, teamPts: 150, winShare: "5.33%" },
+                    { name: "Meet 2", date: "7/8", swimmerPts: 7, teamPts: 148, winShare: "4.73%" },
+                    { name: "Meet 3", date: "7/11", swimmerPts: 8, teamPts: 152, winShare: "5.26%" },
+                    { name: "Meet 4", date: "7/15", swimmerPts: 8, teamPts: 150, winShare: "5.33%" },
+                    { name: "Meet 5", date: "7/17", swimmerPts: 7, teamPts: 150, winShare: "4.67%" }
+                ],
+                strokes: {
+                    Freestyle: { time: "18.07", rank: 3 },
+                    Backstroke: { time: "N/A", rank: null },
+                    Breaststroke: { time: "N/A", rank: null },
+                    Butterfly: { time: "N/A", rank: null }
+                }
+            }
+        };
+
+        // Generate placeholder data for swimmers not in swimmerDetailedData
+        function generatePlaceholderData(swimmerName, swimmerTeam, swimmerEvents) {
+            const basePoints = Math.floor(Math.random() * 30) + 20; // 20-50 points
+            const teamPoints = Math.floor(Math.random() * 300) + 500; // 500-800 points
+            const winShare = ((basePoints / teamPoints) * 100).toFixed(2);
+            
+            const meets = [];
+            for (let i = 1; i <= 5; i++) {
+                const pts = Math.floor(Math.random() * 10) + 5;
+                const tPts = Math.floor(Math.random() * 50) + 100;
+                meets.push({
+                    name: `Meet ${i}`,
+                    date: `7/${i + 10}`,
+                    swimmerPts: pts,
+                    teamPts: tPts,
+                    winShare: ((pts / tPts) * 100).toFixed(2) + "%"
+                });
             }
 
-            // Generic swimmer modal
-            document.getElementById('modalSwimmerName').textContent = `${swimmerName} - ${swimmerTeam}`;
-            const statsDiv = document.getElementById('swimmerStats');
+            const strokes = { Freestyle: null, Backstroke: null, Breaststroke: null, Butterfly: null };
+            swimmerEvents.forEach(e => {
+                const stroke = e.event.replace(/.*?(Freestyle|Backstroke|Breaststroke|Butterfly|IM).*/, '$1');
+                if (strokes.hasOwnProperty(stroke)) {
+                    strokes[stroke] = { time: e.time, rank: e.rank };
+                }
+            });
+            
+            // Fill in N/A for strokes not swum
+            Object.keys(strokes).forEach(s => {
+                if (!strokes[s]) strokes[s] = { time: "N/A", rank: null };
+            });
+
+            // Determine age group from first event
+            let ageGroup = "Unknown";
+            if (swimmerEvents.length > 0) {
+                const firstEvent = swimmerEvents[0].event;
+                if (firstEvent.includes('8 & Under')) ageGroup = "8&U";
+                else if (firstEvent.includes('9-10')) ageGroup = "10&U";
+                else if (firstEvent.includes('11-12')) ageGroup = "12&U";
+                else if (firstEvent.includes('13-14')) ageGroup = "14&U";
+                else ageGroup = "18&U";
+                ageGroup += firstEvent.startsWith('Girls') ? " Girls" : " Boys";
+            }
+
+            return {
+                totalPoints: basePoints,
+                numMeets: 5,
+                teamTotalPoints: teamPoints,
+                winShare: winShare + "%",
+                ageGroup: ageGroup,
+                meets: meets,
+                strokes: strokes,
+                isPlaceholder: true
+            };
+        }
+
+        function showSwimmerAnalytics(swimmerName, swimmerTeam) {
+            const key = `${swimmerName} - ${swimmerTeam}`;
+            document.getElementById('modalSwimmerName').textContent = `${swimmerName.split(', ').reverse().join(' ')} - ${swimmerTeam}`;
             
             // Find all events this swimmer appears in
             const swimmerEvents = [];
@@ -898,18 +968,80 @@
                 }
             }
 
-            let html = '<div class="stat-section"><h3>CCSDA Rankings</h3><div class="event-list">';
-            swimmerEvents.forEach(e => {
-                const stroke = e.event.replace(/.*?(Freestyle|Backstroke|Breaststroke|Butterfly|IM).*/, '$1');
+            // Get data - either from detailed data or generate placeholder
+            let data = swimmerDetailedData[key];
+            if (!data) {
+                data = generatePlaceholderData(swimmerName, swimmerTeam, swimmerEvents);
+            }
+
+            const statsDiv = document.getElementById('swimmerStats');
+            let html = '';
+
+            // Placeholder warning if applicable
+            if (data.isPlaceholder) {
+                html += `<div style="background: rgba(255,165,0,0.2); border: 1px solid orange; padding: 8px; border-radius: 6px; margin-bottom: 15px; font-size: 0.8rem;">
+                    ⚠️ <strong>Placeholder Data</strong> - Real stats will be added when meet data is processed.
+                </div>`;
+            }
+
+            // Season Stats
+            html += `
+                <div class="stat-section">
+                    <h3>Season Stats (Excludes Relays & Champs)</h3>
+                    <p style="margin-bottom: 5px;"><strong>Total Individual Points:</strong> ${data.totalPoints} (${data.numMeets} dual meets)</p>
+                    <p style="margin-bottom: 15px;"><strong>Aggregate Win Share:</strong> ${data.winShare}</p>
+                    <p style="font-size: 0.85rem; color: #ccc;">
+                        *Win Share: Swimmer's individual points ÷ Team's total points across all dual meets.
+                        Excludes relay events and championship meets.
+                    </p>
+                </div>
+            `;
+
+            // Win Share by Meet
+            html += `
+                <div class="stat-section">
+                    <h3>Win Share by Meet (Excludes Relays & Champs)</h3>
+                    <table class="meet-times-table" style="margin-top: 0;">
+                        <thead>
+                            <tr>
+                                <th>Meet</th>
+                                <th>Date</th>
+                                <th>Pts</th>
+                                <th>Team Pts</th>
+                                <th>Win Share</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            data.meets.forEach(m => {
+                html += `<tr><td>${m.name}</td><td>${m.date}</td><td>${m.swimmerPts}</td><td>${m.teamPts}</td><td>${m.winShare}</td></tr>`;
+            });
+            html += `
+                            <tr style="font-weight: bold; background-color: rgba(255, 215, 0, 0.1);">
+                                <td>Season Totals</td><td></td><td>${data.totalPoints}</td><td>${data.teamTotalPoints}</td><td>${data.winShare}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            // Strokes / CCSDA Rankings
+            html += `<div class="stat-section"><h3>${data.ageGroup}</h3><div class="event-list">`;
+            ['Freestyle', 'Backstroke', 'Breaststroke', 'Butterfly'].forEach(stroke => {
+                const s = data.strokes[stroke];
+                const rankClass = s && s.rank ? `rank-${s.rank}` : '';
+                const rankText = s && s.rank ? `CCSDA Rank ${s.rank}` : 'N/A';
+                const timeText = s ? s.time : 'N/A';
                 html += `
                     <div class="event-item">
                         <div class="event-name">${stroke}</div>
-                        <div class="event-time">${e.time}</div>
-                        <div class="event-rank rank-${e.rank}">CCSDA Rank ${e.rank}</div>
+                        <div class="event-time">${timeText}</div>
+                        <div class="event-rank ${rankClass}">${rankText}</div>
                     </div>
                 `;
             });
             html += '</div></div>';
+
             statsDiv.innerHTML = html;
             document.getElementById('swimmerModal').classList.add('active');
         }

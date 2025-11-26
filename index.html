@@ -884,18 +884,18 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
                 const eventSection = document.createElement('div');
                 eventSection.className = 'event-section';
                 
-                // Column headers
-                const colHeaders = document.createElement('div');
-                colHeaders.className = 'column-headers';
-                colHeaders.innerHTML = '<span>CCSDA RANKING</span><span>NAME</span><span>TIME</span>';
-                eventSection.appendChild(colHeaders);
-                
-                // Event name header
+                // Event name header FIRST
                 const isGirlsEvent = eventName.startsWith('Girls');
                 const header = document.createElement('div');
                 header.className = `event-header ${isGirlsEvent ? 'girls' : 'boys'}`;
                 header.innerHTML = formatEventHeader(eventName);
                 eventSection.appendChild(header);
+                
+                // Column headers BELOW event name
+                const colHeaders = document.createElement('div');
+                colHeaders.className = 'column-headers';
+                colHeaders.innerHTML = '<span>CCSDA RANKING</span><span>NAME</span><span>TIME</span>';
+                eventSection.appendChild(colHeaders);
 
                 const genderClass = isGirlsEvent ? 'girls' : 'boys';
                 

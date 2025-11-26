@@ -134,6 +134,59 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
         }
         .explainer strong { color: var(--dark); }
 
+        /* Swimmer Search */
+        .search-container {
+            max-width: 400px;
+            margin: 15px auto;
+            position: relative;
+        }
+        #swimmerSearch {
+            width: 100%;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            font-family: Georgia, serif;
+            border: 2px solid var(--accent);
+            border-radius: 25px;
+            outline: none;
+        }
+        #swimmerSearch:focus {
+            border-color: var(--boys-color);
+        }
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .search-results.active {
+            display: block;
+        }
+        .search-result-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            font-family: Georgia, serif;
+        }
+        .search-result-item:hover {
+            background: var(--primary);
+        }
+        .search-result-item .swimmer-name {
+            font-weight: bold;
+            color: var(--dark);
+        }
+        .search-result-item .swimmer-team {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
         /* The Matrix Container */
         .matrix-container {
             flex-grow: 1;
@@ -481,6 +534,13 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
         <div class="logo">CLUB SWIM RANK</div>
         <h1>CCSDA Leaders</h1>
         <p class="subtitle">Top 3 in Each Event • 2025 Season</p>
+        
+        <!-- Swimmer Search -->
+        <div class="search-container">
+            <input type="text" id="swimmerSearch" placeholder="Search swimmer by name..." onkeyup="searchSwimmers()" autocomplete="off">
+            <div id="searchResults" class="search-results"></div>
+        </div>
+        
         <div class="explainer">Subscribers who have been asking us what "% Win Share" means: it measures the degree to which a given club's victories were "caused" by each swimmer's efforts. Mathematically it is simply: <strong>(Individual Points / Club Total Points) × 100</strong></div>
     </header>
 
@@ -980,6 +1040,94 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
 
         window.onload = init;
 
+        // ========================================
+        // SWIMMER SEARCH FUNCTIONALITY
+        // ========================================
+        // Fuzzy match for misspellings (Levenshtein distance)
+        function levenshtein(a, b) {
+            if (a.length === 0) return b.length;
+            if (b.length === 0) return a.length;
+            const matrix = [];
+            for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+            for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= a.length; j++) {
+                    if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+            return matrix[b.length][a.length];
+        }
+
+        function searchSwimmers() {
+            const query = document.getElementById('swimmerSearch').value.toLowerCase().trim();
+            const resultsDiv = document.getElementById('searchResults');
+            
+            if (query.length < 2) {
+                resultsDiv.classList.remove('active');
+                return;
+            }
+            
+            // Get all swimmers from swimmerDetailedData
+            const matches = [];
+            for (const [key, data] of Object.entries(swimmerDetailedData)) {
+                const [fullName, team] = key.split(' - ');
+                const [lastName, firstName] = fullName.split(', ');
+                const searchName = `${firstName} ${lastName}`.toLowerCase();
+                const reverseName = `${lastName} ${firstName}`.toLowerCase();
+                
+                // Check exact match or fuzzy match
+                const exactMatch = searchName.includes(query) || reverseName.includes(query);
+                const firstNameDist = levenshtein(query, firstName?.toLowerCase() || '');
+                const lastNameDist = levenshtein(query, lastName?.toLowerCase() || '');
+                const fuzzyMatch = firstNameDist <= 2 || lastNameDist <= 2;
+                
+                if (exactMatch || fuzzyMatch) {
+                    matches.push({
+                        key,
+                        name: fullName,
+                        displayName: `${firstName} ${lastName}`,
+                        team,
+                        ageGroup: data.ageGroup,
+                        score: exactMatch ? 0 : Math.min(firstNameDist, lastNameDist)
+                    });
+                }
+            }
+            
+            // Sort by match quality
+            matches.sort((a, b) => a.score - b.score);
+            
+            if (matches.length === 0) {
+                resultsDiv.innerHTML = '<div class="search-result-item"><em>No swimmers found</em></div>';
+                resultsDiv.classList.add('active');
+                return;
+            }
+            
+            // Display results
+            resultsDiv.innerHTML = matches.slice(0, 10).map(m => `
+                <div class="search-result-item" onclick="showSwimmerAnalytics('${m.name.replace(/'/g, "\\'")}', '${m.team.replace(/'/g, "\\'")}')">
+                    <div class="swimmer-name">${m.displayName}</div>
+                    <div class="swimmer-team">${m.team} • ${m.ageGroup}</div>
+                </div>
+            `).join('');
+            resultsDiv.classList.add('active');
+        }
+
+        // Hide search results when clicking outside
+        document.addEventListener('click', function(e) {
+            const searchContainer = document.querySelector('.search-container');
+            if (searchContainer && !searchContainer.contains(e.target)) {
+                document.getElementById('searchResults').classList.remove('active');
+            }
+        });
+
         // Modal functions
         function closeModal(event) {
             if (event && event.target !== event.currentTarget) return;
@@ -1135,6 +1283,26 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
                 strokes: { Freestyle: { time: "18.21", rank: 4 }, Backstroke: { time: "N/A", rank: null }, Breaststroke: { time: "26.29", rank: 6 }, Butterfly: { time: "21.37", rank: 3 } }
             },
             // 8&U Boys - VERIFIED from meet PDFs
+            "Wiegmann, Bowen - Columbia": {
+                totalPoints: 1,
+                numMeets: 5,
+                teamTotalPoints: 727.5,
+                winShare: "0.14%",
+                ageGroup: "8&U Boys",
+                meets: [
+                    { name: "Columbia v Edgemoor", date: "6/17", swimmerPts: 0, teamPts: 223, winShare: "0.00%" },
+                    { name: "WGCC v Columbia", date: "7/8", swimmerPts: 0, teamPts: 113, winShare: "0.00%" },
+                    { name: "Congo/Columbia/Chevy", date: "7/11", swimmerPts: 0, teamPts: 95, winShare: "0.00%" },
+                    { name: "Columbia v Army Navy", date: "7/15", swimmerPts: 1, teamPts: 144.5, winShare: "0.69%" },
+                    { name: "Columbia v Kenwood", date: "7/17", swimmerPts: 0, teamPts: 152, winShare: "0.00%" }
+                ],
+                strokes: {
+                    Freestyle: { time: "21.56", rank: null },
+                    Backstroke: { time: "36.58", rank: null },
+                    Breaststroke: { time: "N/A", rank: null },
+                    Butterfly: { time: "26.95", rank: 25 }
+                }
+            },
             "Greenstreet, Bryce - Avenel": {
                 totalPoints: 45, numMeets: 3, teamTotalPoints: 444, winShare: "10.14%",
                 ageGroup: "8&U Boys",

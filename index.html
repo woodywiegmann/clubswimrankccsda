@@ -36,17 +36,19 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
     <title>CCSDA Leaderboard</title>
     <style>
         :root {
-            --primary: #005f73;
-            --secondary: #0a9396;
-            --accent: #ee9b00;
-            --light: #e9d8a6;
-            --dark: #001219;
+            --primary: #9b7bb8;
+            --secondary: #7bc8c8;
+            --accent: #e8a87c;
+            --light: #f5f0fa;
+            --dark: #2d2a3e;
             --gold: #FFD700;
             --silver: #C0C0C0;
             --bronze: #CD7F32;
             --light-gold: #FFF8DC;
             --light-silver: #F5F5F5;
             --light-bronze: #E6C19A;
+            --girls-color: #8b5cf6;
+            --boys-color: #06b6d4;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
@@ -136,17 +138,32 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
             gap: 3px;
         }
 
-        .event-header {
+        .section-header {
             color: var(--light);
+            font-size: 0.55rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 4px 8px;
+            background: linear-gradient(135deg, var(--girls-color), var(--boys-color));
+            border-radius: 4px 4px 0 0;
+            margin-bottom: 0;
+            text-align: center;
+        }
+        .event-header {
+            color: var(--dark);
             font-size: 0.65rem;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.3px;
-            padding: 2px 0;
-            border-bottom: 1px solid var(--secondary);
-            margin-bottom: 2px;
+            padding: 4px 6px;
+            background: var(--light);
+            border-bottom: 2px solid var(--secondary);
+            margin-bottom: 3px;
             line-height: 1.2;
         }
+        .event-header.girls { border-bottom-color: var(--girls-color); }
+        .event-header.boys { border-bottom-color: var(--boys-color); }
 
         .age-group-label {
             color: var(--accent);
@@ -248,12 +265,10 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
             line-height: 1.2;
             cursor: pointer;
             text-decoration: underline;
-            color: var(--primary);
         }
-
-        .name:hover {
-            color: var(--secondary);
-        }
+        .name.girls { color: var(--girls-color); }
+        .name.boys { color: var(--boys-color); }
+        .name:hover { opacity: 0.7; }
         .team { 
             font-size: 0.6rem; 
             color: #555; 
@@ -263,25 +278,21 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
         }
         
         .win-share {
-            font-size: 0.5rem;
+            font-size: 0.48rem;
             color: #333;
             font-weight: 600;
-            background: #f5f5f5;
-            padding: 2px 4px;
-            border-radius: 3px;
+            background: linear-gradient(135deg, #fff5f5, #fff8e8);
+            padding: 2px 5px;
+            border-radius: 4px;
             margin-top: 2px;
             display: flex;
             align-items: center;
-            gap: 4px;
-            border: 1px solid #ddd;
+            gap: 3px;
+            border: 1px solid #f0d0a0;
         }
-        .win-share-label {
-            color: #666;
-        }
-        .win-share-value {
-            color: #228b22;
-            font-weight: 700;
-        }
+        .win-share-flame { font-size: 0.6rem; }
+        .win-share-label { color: #666; font-size: 0.45rem; }
+        .win-share-value { color: #e65100; font-weight: 700; }
         .win-share-rank {
             padding: 1px 4px;
             border-radius: 3px;
@@ -456,7 +467,7 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
 
     <div class="matrix-container">
         <div id="matrix" class="matrix">
-        </div>
+            </div>
     </div>
 
     <footer>
@@ -868,11 +879,21 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
                 const eventSection = document.createElement('div');
                 eventSection.className = 'event-section';
                 
+                // Add CCSDA STROKE RANK section header
+                const sectionHeader = document.createElement('div');
+                sectionHeader.className = 'section-header';
+                sectionHeader.textContent = 'CCSDA STROKE RANK';
+                eventSection.appendChild(sectionHeader);
+                
+                const isGirlsEvent = eventName.startsWith('Girls');
                 const header = document.createElement('div');
-                header.className = 'event-header';
+                header.className = `event-header ${isGirlsEvent ? 'girls' : 'boys'}`;
                 header.innerHTML = formatEventHeader(eventName);
                 eventSection.appendChild(header);
 
+                const isGirls = eventName.startsWith('Girls');
+                const genderClass = isGirls ? 'girls' : 'boys';
+                
                 swimmers.forEach(swimmer => {
                     const card = document.createElement('div');
                     let cardClass = `swimmer-card rank-${swimmer.rank}`;
@@ -895,7 +916,7 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
                         
                         const diffSpan = document.createElement('span');
                         diffSpan.className = 'record-diff';
-                        diffSpan.textContent = `(${recordDiff} from CCSDA record)`;
+                        diffSpan.textContent = `(${recordDiff} from record)`;
                         timeDiv.appendChild(diffSpan);
                     } else {
                         timeDiv.textContent = swimmer.time;
@@ -903,6 +924,10 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
                     
                     const escapedName = swimmer.name.replace(/'/g, "\\'");
                     const escapedTeam = swimmer.team.replace(/'/g, "\\'");
+                    
+                    // Convert "Last, First" to "First Last"
+                    const nameParts = swimmer.name.split(', ');
+                    const displayName = nameParts.length === 2 ? `${nameParts[1]} ${nameParts[0]}` : swimmer.name;
                     
                     // Look up win share from swimmerDetailedData
                     const swimmerKey = `${swimmer.name} - ${swimmer.team}`;
@@ -913,12 +938,13 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
                     const wsRankClass = wsRank <= 3 ? `ws-rank-${wsRank}` : 'ws-rank-other';
                     
                     card.innerHTML = `
-                        <div class="rank-badge">${swimmer.rank}</div>
+                        <div class="rank-badge"></div>
                         <div class="info">
-                            <span class="name" onclick="showSwimmerAnalytics('${escapedName}', '${escapedTeam}')">${swimmer.name}</span>
+                            <span class="name ${genderClass}" onclick="showSwimmerAnalytics('${escapedName}', '${escapedTeam}')">${displayName}</span>
                             <span class="team">${swimmer.team}</span>
                             <div class="win-share">
-                                <span class="win-share-label">Win Share:</span>
+                                <span class="win-share-flame">🔥</span>
+                                <span class="win-share-label">Win Share</span>
                                 <span class="win-share-value">${winShareValue}</span>
                                 <span class="win-share-rank ${wsRankClass}">#${wsRank}</span>
                             </div>

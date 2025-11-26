@@ -964,7 +964,7 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
                 header.className = `event-header ${isGirlsEvent ? 'girls' : 'boys'}`;
                 header.innerHTML = formatEventHeader(eventName);
                 eventSection.appendChild(header);
-                
+
                 // Column headers BELOW event name
                 const colHeaders = document.createElement('div');
                 colHeaders.className = 'column-headers';
@@ -1297,10 +1297,10 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
                     { name: "Columbia v Kenwood", date: "7/17", swimmerPts: 0, teamPts: 152, winShare: "0.00%" }
                 ],
                 strokes: {
-                    Freestyle: { time: "21.56", rank: null },
-                    Backstroke: { time: "36.58", rank: null },
+                    Freestyle: { time: "21.56", rank: "30+" },  // Outside top 25 (cutoff: 20.25)
+                    Backstroke: { time: "36.58", rank: "50+" }, // Outside top 25 (cutoff: 27.25)
                     Breaststroke: { time: "N/A", rank: null },
-                    Butterfly: { time: "26.95", rank: 25 }
+                    Butterfly: { time: "26.95", rank: 25 }      // Confirmed in top times
                 }
             },
             "Greenstreet, Bryce - Avenel": {

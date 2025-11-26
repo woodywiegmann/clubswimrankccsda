@@ -257,6 +257,125 @@
             flex-shrink: 0;
         }
 
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--dark);
+            border: 2px solid var(--secondary);
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--secondary);
+        }
+
+        .modal-header h2 {
+            color: var(--light);
+            font-size: 1.2rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .stat-section {
+            margin-bottom: 20px;
+        }
+
+        .stat-section h3 {
+            color: var(--accent);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .event-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .event-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .event-name {
+            color: white;
+            font-weight: 600;
+        }
+
+        .event-time {
+            color: var(--light);
+            font-family: 'Courier New', monospace;
+        }
+
+        .event-rank {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .event-rank.rank-1 { background: var(--gold); color: var(--dark); }
+        .event-rank.rank-2 { background: var(--silver); color: var(--dark); }
+        .event-rank.rank-3 { background: var(--bronze); color: var(--dark); }
+
+        .meet-times-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.8rem;
+        }
+
+        .meet-times-table th, .meet-times-table td {
+            padding: 6px 8px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .meet-times-table th {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .meet-times-table td {
+            color: white;
+        }
+
     </style>
 </head>
 <body>
@@ -276,12 +395,23 @@
 
     <div class="matrix-container">
         <div id="matrix" class="matrix">
-            </div>
+        </div>
     </div>
 
     <footer>
         CCSDA Data Visualization
     </footer>
+
+    <!-- Swimmer Modal -->
+    <div id="swimmerModal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 id="modalSwimmerName">Swimmer Name</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="swimmerStats"></div>
+        </div>
+    </div>
 
     <script>
         // League Records (from https://www.gomotionapp.com/team/reccdccsdamd/page/record-swims)
@@ -666,7 +796,7 @@
                     card.innerHTML = `
                         <div class="rank-badge">${swimmer.rank}</div>
                         <div class="info">
-                            <span class="name">${swimmer.name}</span>
+                            <span class="name" onclick="showSwimmerAnalytics('${swimmer.name}', '${swimmer.team}')">${swimmer.name}</span>
                             <span class="team">${swimmer.team}</span>
                         </div>
                     `;
@@ -679,6 +809,110 @@
         }
 
         window.onload = init;
+
+        // Modal functions
+        function closeModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('swimmerModal').classList.remove('active');
+        }
+
+        function showSwimmerAnalytics(swimmerName, swimmerTeam) {
+            // Specific data for June Wiegmann
+            if (swimmerName === "Wiegmann, June" && swimmerTeam === "Columbia") {
+                document.getElementById('modalSwimmerName').textContent = `June Wiegmann - Columbia`;
+                const statsDiv = document.getElementById('swimmerStats');
+                statsDiv.innerHTML = `
+                    <div class="stat-section">
+                        <h3>Season Stats (Excludes Relays & Champs)</h3>
+                        <p style="margin-bottom: 5px;"><strong>Total Individual Points:</strong> 58 (5 dual meets)</p>
+                        <p style="margin-bottom: 15px;"><strong>Aggregate Win Share:</strong> 7.97%</p>
+                        <p style="font-size: 0.85rem; color: #ccc;">
+                            *Win Share: Swimmer's individual points ÷ Team's total points across all dual meets.
+                            Excludes relay events and championship meets.
+                        </p>
+                    </div>
+                    <div class="stat-section">
+                        <h3>Win Share by Meet (Excludes Relays & Champs)</h3>
+                        <table class="meet-times-table" style="margin-top: 0;">
+                            <thead>
+                                <tr>
+                                    <th>Meet</th>
+                                    <th>Date</th>
+                                    <th>June's Pts</th>
+                                    <th>Columbia Pts</th>
+                                    <th>Win Share</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Columbia v Edgemoor</td><td>6/17</td><td>15</td><td>223</td><td>6.73%</td></tr>
+                                <tr><td>WGCC v Columbia</td><td>7/8</td><td>15</td><td>113</td><td>13.27%</td></tr>
+                                <tr><td>Congo/Columbia/Chevy</td><td>7/11</td><td>10</td><td>95</td><td>10.53%</td></tr>
+                                <tr><td>Columbia v Army Navy</td><td>7/15</td><td>10</td><td>144.5</td><td>6.92%</td></tr>
+                                <tr><td>Columbia v Kenwood</td><td>7/17</td><td>8</td><td>152</td><td>5.26%</td></tr>
+                                <tr style="font-weight: bold; background-color: rgba(255, 215, 0, 0.1);">
+                                    <td>Season Totals</td><td></td><td>58</td><td>727.5</td><td>7.97%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="stat-section">
+                        <h3>8&U Girls</h3>
+                        <div class="event-list">
+                            <div class="event-item">
+                                <div class="event-name">Freestyle</div>
+                                <div class="event-time">16.71</div>
+                                <div class="event-rank rank-1">CCSDA Rank 1</div>
+                            </div>
+                            <div class="event-item">
+                                <div class="event-name">Backstroke</div>
+                                <div class="event-time">22.88</div>
+                                <div class="event-rank rank-3">CCSDA Rank 3</div>
+                            </div>
+                            <div class="event-item">
+                                <div class="event-name">Breaststroke</div>
+                                <div class="event-time">N/A</div>
+                                <div class="event-rank">N/A</div>
+                            </div>
+                            <div class="event-item">
+                                <div class="event-name">Butterfly</div>
+                                <div class="event-time">22.33</div>
+                                <div class="event-rank">CCSDA Rank 4</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('swimmerModal').classList.add('active');
+                return;
+            }
+
+            // Generic swimmer modal
+            document.getElementById('modalSwimmerName').textContent = `${swimmerName} - ${swimmerTeam}`;
+            const statsDiv = document.getElementById('swimmerStats');
+            
+            // Find all events this swimmer appears in
+            const swimmerEvents = [];
+            for (const [eventName, swimmers] of Object.entries(eventsData)) {
+                const found = swimmers.find(s => s.name === swimmerName && s.team === swimmerTeam);
+                if (found) {
+                    swimmerEvents.push({ event: eventName, ...found });
+                }
+            }
+
+            let html = '<div class="stat-section"><h3>CCSDA Rankings</h3><div class="event-list">';
+            swimmerEvents.forEach(e => {
+                const stroke = e.event.replace(/.*?(Freestyle|Backstroke|Breaststroke|Butterfly|IM).*/, '$1');
+                html += `
+                    <div class="event-item">
+                        <div class="event-name">${stroke}</div>
+                        <div class="event-time">${e.time}</div>
+                        <div class="event-rank rank-${e.rank}">CCSDA Rank ${e.rank}</div>
+                    </div>
+                `;
+            });
+            html += '</div></div>';
+            statsDiv.innerHTML = html;
+            document.getElementById('swimmerModal').classList.add('active');
+        }
     </script>
 </body>
 </html>

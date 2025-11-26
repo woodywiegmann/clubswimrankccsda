@@ -122,6 +122,17 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
 
         h1 { font-size: 0.9rem; font-weight: 600; letter-spacing: 2px; margin-top: 8px; color: var(--dark); text-transform: uppercase; }
         p.subtitle { font-size: 0.7rem; color: #888; margin-top: 4px; }
+        .explainer {
+            max-width: 800px;
+            margin: 15px auto 0;
+            padding: 10px 15px;
+            background: #fffbeb;
+            border: 1px solid #f0d070;
+            font-size: 0.7rem;
+            color: #555;
+            line-height: 1.5;
+        }
+        .explainer strong { color: var(--dark); }
 
         /* The Matrix Container */
         .matrix-container {
@@ -145,48 +156,48 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
         /* Event Section */
         .event-section {
             background: #fff;
-            border: 2px solid #ddd;
+            border: 1px solid #333;
         }
-
-        .column-headers {
-            display: grid;
-            grid-template-columns: 80px 1fr 80px;
-            background: var(--primary);
-            border-bottom: 2px solid var(--accent);
-        }
-        .column-headers span {
-            padding: 8px 10px;
-            font-size: 0.65rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--dark);
-            text-align: center;
-            border-right: 1px solid rgba(0,0,0,0.1);
-        }
-        .column-headers span:last-child { border-right: none; }
 
         .event-header {
             color: var(--dark);
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
             padding: 10px;
             background: #fff;
-            border-bottom: 2px solid var(--secondary);
+            border-bottom: 1px solid #333;
             text-align: center;
         }
-        .event-header.girls { border-bottom-color: var(--girls-color); background: rgba(157, 123, 176, 0.1); }
-        .event-header.boys { border-bottom-color: var(--boys-color); background: rgba(95, 168, 168, 0.1); }
+        .event-header.girls { background: var(--primary); }
+        .event-header.boys { background: var(--secondary); }
+
+        .column-headers {
+            display: grid;
+            grid-template-columns: 60px 1fr 70px;
+            background: #fff;
+            border-bottom: 1px solid #333;
+        }
+        .column-headers span {
+            padding: 6px 8px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--dark);
+            text-align: center;
+            border-right: 1px solid #333;
+        }
+        .column-headers span:last-child { border-right: none; }
 
         /* Individual Swimmer Cards */
         .swimmer-card {
             display: grid;
-            grid-template-columns: 80px 1fr 80px;
+            grid-template-columns: 60px 1fr 70px;
             background: #fff;
             color: var(--dark);
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #333;
         }
         
         .swimmer-card:last-child {
@@ -199,41 +210,39 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
 
         .rank-cell {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 12px;
-            border-right: 1px solid #eee;
+            padding: 10px 5px;
+            border-right: 1px solid #333;
+            text-align: center;
         }
 
-        .rank-badge {
-            width: 32px;
-            height: 32px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .rank-text {
+            font-family: Georgia, serif;
             font-weight: 700;
-            font-size: 1rem;
-            color: #fff;
+            font-size: 0.9rem;
+            color: #000;
         }
 
-        .rank-1 .rank-badge { background: var(--gold); }
-        .rank-2 .rank-badge { background: var(--silver); }
-        .rank-3 .rank-badge { background: var(--bronze); }
+        .rank-medal {
+            font-size: 0.8rem;
+            margin-top: 2px;
+        }
 
         .info-cell {
             padding: 10px 12px;
-            border-right: 1px solid #eee;
+            border-right: 1px solid #333;
         }
 
         .time-cell {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 12px;
+            padding: 10px 8px;
             font-family: Georgia, serif;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 1.1rem;
             color: var(--dark);
         }
 
@@ -245,6 +254,7 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
             font-size: 0.5rem;
             color: var(--gold);
             display: block;
+            text-align: center;
         }
 
         .name { 
@@ -277,7 +287,28 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
         .win-share-flame { font-size: 0.7rem; }
         .win-share-pct { 
             font-family: Georgia, serif;
-            font-weight: 700; 
+            font-weight: 700;
+        }
+        
+        .ws-rank-label {
+            font-size: 0.6rem;
+            color: #666;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+        .ws-rank-label span {
+            color: var(--dark);
+        }
+
+        /* Team mascot images */
+        .mascot-area {
+            margin-top: 8px;
+            text-align: center;
+        }
+        .mascot-area img {
+            max-height: 45px;
+            max-width: 55px;
+            opacity: 0.6; 
             font-size: 0.8rem;
             color: var(--dark);
         }
@@ -439,6 +470,7 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
         <div class="logo">CLUB SWIM RANK</div>
         <h1>CCSDA Leaders</h1>
         <p class="subtitle">Top 3 in Each Event • 2025 Season</p>
+        <div class="explainer">Subscribers who have been asking us what "% Win Share" means: it measures the degree to which a given club's victories were "caused" by each swimmer's efforts. Mathematically it is simply: <strong>(Individual Points / Club Total Points) × 100</strong></div>
     </header>
 
     <div class="matrix-container">
@@ -901,9 +933,26 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
                         timeHTML = `${swimmer.time}<span class="record-diff">(${recordDiff} from record)</span>`;
                     }
                     
+                    // Get rank suffix (1st, 2nd, 3rd)
+                    const rankSuffix = swimmer.rank === 1 ? '1st' : swimmer.rank === 2 ? '2nd' : '3rd';
+                    const medalEmoji = swimmer.rank === 1 ? '🥇' : swimmer.rank === 2 ? '🥈' : '🥉';
+                    
+                    // Get mascot image based on team
+                    const mascotMap = {
+                        'Columbia': '🦈', // Shark
+                        'Manor': '👹', // Monster  
+                        'Bethesda': '🐝', // (placeholder)
+                        'Kenwood': '🦁', // (placeholder)
+                        'Chevy Chase': '🏊', // (placeholder)
+                        'Congressional': '🦅', // (placeholder)
+                        'Edgemoor': '🐊', // (placeholder)
+                    };
+                    const mascot = mascotMap[swimmer.team] || '🏊';
+                    
                     card.innerHTML = `
                         <div class="rank-cell">
-                        <div class="rank-badge">${swimmer.rank}</div>
+                            <span class="rank-text">${rankSuffix}</span>
+                            <span class="rank-medal">${medalEmoji}</span>
                         </div>
                         <div class="info-cell">
                             <span class="name ${genderClass}" onclick="showSwimmerAnalytics('${escapedName}', '${escapedTeam}')">${displayName}</span>
@@ -912,7 +961,8 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
                                 <span class="win-share-flame">🔥</span>
                                 <span class="win-share-pct">${winShareValue}</span>
                             </div>
-                            <div class="ws-rank-label">CCSDA Win Share Rank: <span>#${wsRank}</span></div>
+                            <div class="ws-rank-label">CCSDA Win Share Rank: <span>${wsRank}${wsRank <= 3 ? ['', 'st', 'nd', 'rd'][wsRank] : 'th'}</span></div>
+                            <div class="mascot-area">${mascot}</div>
                         </div>
                         <div class="time-cell">${timeHTML}</div>
                     `;

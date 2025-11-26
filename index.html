@@ -263,15 +263,35 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
         }
         
         .win-share {
-            font-size: 0.55rem;
-            color: #228b22;
+            font-size: 0.5rem;
+            color: #333;
             font-weight: 600;
-            background: #e8f5e9;
-            padding: 1px 3px;
-            border-radius: 2px;
-            margin-top: 1px;
-            display: inline-block;
+            background: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            border: 1px solid #ddd;
         }
+        .win-share-label {
+            color: #666;
+        }
+        .win-share-value {
+            color: #228b22;
+            font-weight: 700;
+        }
+        .win-share-rank {
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-weight: 700;
+            font-size: 0.45rem;
+        }
+        .ws-rank-1 { background: var(--gold); color: var(--dark); }
+        .ws-rank-2 { background: var(--silver); color: var(--dark); }
+        .ws-rank-3 { background: var(--bronze); color: var(--dark); }
+        .ws-rank-other { background: #e0e0e0; color: #555; }
         
         .time { 
             font-family: 'Courier New', monospace; 
@@ -762,6 +782,36 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
             return '';
         }
 
+        // Get age group from event name for swimmers without detailed data
+        function getAgeGroupFromEvent(eventName) {
+            const gender = eventName.startsWith('Girls') ? 'Girls' : 'Boys';
+            if (eventName.includes('8 & Under')) return `8&U ${gender}`;
+            if (eventName.includes('9-10')) return `10&U ${gender}`;
+            if (eventName.includes('11-12')) return `12&U ${gender}`;
+            if (eventName.includes('13-14')) return `14&U ${gender}`;
+            if (eventName.includes('15+')) return `15+ ${gender}`;
+            return `15+ ${gender}`;
+        }
+
+        // Calculate win share rank within age/gender group
+        function getWinShareRank(swimmerKey, ageGroup) {
+            // Collect all swimmers in same age group with win share data
+            const groupSwimmers = [];
+            for (const [key, data] of Object.entries(swimmerDetailedData)) {
+                if (data.ageGroup === ageGroup && data.winShare && data.winShare !== 'N/A') {
+                    const wsNum = parseFloat(data.winShare.replace('%', ''));
+                    if (!isNaN(wsNum)) {
+                        groupSwimmers.push({ key, winShare: wsNum });
+                    }
+                }
+            }
+            // Sort by win share descending
+            groupSwimmers.sort((a, b) => b.winShare - a.winShare);
+            // Find rank
+            const idx = groupSwimmers.findIndex(s => s.key === swimmerKey);
+            return idx >= 0 ? idx + 1 : 99;
+        }
+
         // Format event header with age group
         function formatEventHeader(eventName) {
             const ageGroup = getAgeGroupLabel(eventName);
@@ -857,14 +907,21 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
                     // Look up win share from swimmerDetailedData
                     const swimmerKey = `${swimmer.name} - ${swimmer.team}`;
                     const swimmerData = swimmerDetailedData[swimmerKey];
-                    const winShareDisplay = swimmerData && swimmerData.winShare ? swimmerData.winShare : '';
+                    const winShareValue = swimmerData && swimmerData.winShare ? swimmerData.winShare : '0%';
+                    const ageGroup = swimmerData ? swimmerData.ageGroup : getAgeGroupFromEvent(eventName);
+                    const wsRank = getWinShareRank(swimmerKey, ageGroup);
+                    const wsRankClass = wsRank <= 3 ? `ws-rank-${wsRank}` : 'ws-rank-other';
                     
                     card.innerHTML = `
                         <div class="rank-badge">${swimmer.rank}</div>
                         <div class="info">
                             <span class="name" onclick="showSwimmerAnalytics('${escapedName}', '${escapedTeam}')">${swimmer.name}</span>
                             <span class="team">${swimmer.team}</span>
-                            ${winShareDisplay ? `<span class="win-share">WS: ${winShareDisplay}</span>` : ''}
+                            <div class="win-share">
+                                <span class="win-share-label">Win Share:</span>
+                                <span class="win-share-value">${winShareValue}</span>
+                                <span class="win-share-rank ${wsRankClass}">#${wsRank}</span>
+                            </div>
                         </div>
                     `;
                     card.appendChild(timeDiv);
@@ -1022,22 +1079,23 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
                 strokes: { Freestyle: { time: "18.62", rank: 8 }, Backstroke: { time: "26.48", rank: 23 }, Breaststroke: { time: "27.12", rank: 13 }, Butterfly: { time: "21.21", rank: 2 } }
             },
             "Wilson, Ruth - Army Navy": {
-                totalPoints: 18, numMeets: 2, teamTotalPoints: 300, winShare: "6.00%",
+                totalPoints: 28, numMeets: 4, teamTotalPoints: 600, winShare: "4.67%",
                 ageGroup: "8&U Girls",
                 meets: [
-                    { name: "Congo v AN", date: "7/17", swimmerPts: 13, teamPts: 150, winShare: "8.67%" },
-                    { name: "AN v Chevy", date: "6/17", swimmerPts: 5, teamPts: 150, winShare: "3.33%" }
+                    { name: "WG v Army", date: "6/24", swimmerPts: 9, teamPts: 150, winShare: "6.00%" },
+                    { name: "Congo v AN", date: "7/15", swimmerPts: 13, teamPts: 150, winShare: "8.67%" },
+                    { name: "Army v Colu", date: "7/16", swimmerPts: 6, teamPts: 150, winShare: "4.00%" }
                 ],
                 strokes: { Freestyle: { time: "18.21", rank: 4 }, Backstroke: { time: "N/A", rank: null }, Breaststroke: { time: "26.29", rank: 6 }, Butterfly: { time: "21.37", rank: 3 } }
             },
             // 8&U Boys - VERIFIED from meet PDFs
             "Greenstreet, Bryce - Avenel": {
-                totalPoints: 45, numMeets: 3, teamTotalPoints: 450, winShare: "10.00%",
+                totalPoints: 45, numMeets: 3, teamTotalPoints: 444, winShare: "10.14%",
                 ageGroup: "8&U Boys",
                 meets: [
-                    { name: "WGCC v Ave", date: "6/17", swimmerPts: 15, teamPts: 150, winShare: "10.00%" },
-                    { name: "Norbeck v Ave", date: "7/8", swimmerPts: 15, teamPts: 150, winShare: "10.00%" },
-                    { name: "Ave v Beth", date: "7/17", swimmerPts: 15, teamPts: 150, winShare: "10.00%" }
+                    { name: "WGCC v Ave", date: "6/17", swimmerPts: 15, teamPts: 96, winShare: "15.63%" },
+                    { name: "Norbeck v Ave", date: "7/8", swimmerPts: 15, teamPts: 250, winShare: "6.00%" },
+                    { name: "Ave v Beth", date: "7/17", swimmerPts: 15, teamPts: 98, winShare: "15.31%" }
                 ],
                 strokes: { Freestyle: { time: "16.20", rank: 1 }, Backstroke: { time: "20.49", rank: 1 }, Breaststroke: { time: "23.30", rank: 1 }, Butterfly: { time: "17.69", rank: 1 } }
             },
@@ -1048,26 +1106,38 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
                 strokes: { Freestyle: { time: "16.72", rank: 2 }, Backstroke: { time: "26.17", rank: 17 }, Breaststroke: { time: "27.08", rank: 11 }, Butterfly: { time: "19.09", rank: 2 } }
             },
             "Dove, Edward - Congressional": {
-                totalPoints: 15, numMeets: 1, teamTotalPoints: 150, winShare: "10.00%",
+                totalPoints: 67, numMeets: 5, teamTotalPoints: 750, winShare: "8.93%",
                 ageGroup: "8&U Boys",
                 meets: [
-                    { name: "BCC v Congo", date: "6/17", swimmerPts: 15, teamPts: 150, winShare: "10.00%" }
+                    { name: "Congo v Lake", date: "6/12", swimmerPts: 11, teamPts: 150, winShare: "7.33%" },
+                    { name: "BCC v Congo", date: "6/17", swimmerPts: 15, teamPts: 150, winShare: "10.00%" },
+                    { name: "CG v KE", date: "6/24", swimmerPts: 11, teamPts: 150, winShare: "7.33%" },
+                    { name: "Congo v WG", date: "7/15", swimmerPts: 15, teamPts: 150, winShare: "10.00%" },
+                    { name: "Congo v AN", date: "7/17", swimmerPts: 15, teamPts: 150, winShare: "10.00%" }
                 ],
                 strokes: { Freestyle: { time: "17.06", rank: 3 }, Backstroke: { time: "23.06", rank: 3 }, Breaststroke: { time: "27.49", rank: 13 }, Butterfly: { time: "20.72", rank: 5 } }
             },
             "Dunn, Patrick - Congressional": {
-                totalPoints: 11, numMeets: 1, teamTotalPoints: 150, winShare: "7.33%",
+                totalPoints: 37, numMeets: 6, teamTotalPoints: 900, winShare: "4.11%",
                 ageGroup: "8&U Boys",
                 meets: [
-                    { name: "BCC v Congo", date: "6/17", swimmerPts: 11, teamPts: 150, winShare: "7.33%" }
+                    { name: "Congo v Lake", date: "6/12", swimmerPts: 6, teamPts: 150, winShare: "4.00%" },
+                    { name: "BCC v Congo", date: "6/17", swimmerPts: 11, teamPts: 150, winShare: "7.33%" },
+                    { name: "CG v KE", date: "6/24", swimmerPts: 6, teamPts: 150, winShare: "4.00%" },
+                    { name: "Congo v Colu", date: "7/11", swimmerPts: 5, teamPts: 150, winShare: "3.33%" },
+                    { name: "Congo v WG", date: "7/15", swimmerPts: 3, teamPts: 150, winShare: "2.00%" },
+                    { name: "Congo v AN", date: "7/17", swimmerPts: 6, teamPts: 150, winShare: "4.00%" }
                 ],
                 strokes: { Freestyle: { time: "18.12", rank: 4 }, Backstroke: { time: "22.44", rank: 2 }, Breaststroke: { time: "28.16", rank: 14 }, Butterfly: { time: "23.15", rank: 10 } }
             },
             "Dolan, Fitzgerald - Washington Golf": {
-                totalPoints: 22, numMeets: 2, teamTotalPoints: 300, winShare: "7.33%",
+                totalPoints: 56, numMeets: 5, teamTotalPoints: 750, winShare: "7.47%",
                 ageGroup: "8&U Boys",
                 meets: [
                     { name: "WGCC v Ave", date: "6/17", swimmerPts: 11, teamPts: 150, winShare: "7.33%" },
+                    { name: "WG v Army", date: "6/24", swimmerPts: 13, teamPts: 150, winShare: "8.67%" },
+                    { name: "WGCC v Colu", date: "7/8", swimmerPts: 13, teamPts: 150, winShare: "8.67%" },
+                    { name: "Congo v WG", date: "7/15", swimmerPts: 8, teamPts: 150, winShare: "5.33%" },
                     { name: "WGCC v KE", date: "7/23", swimmerPts: 11, teamPts: 150, winShare: "7.33%" }
                 ],
                 strokes: { Freestyle: { time: "18.58", rank: 6 }, Backstroke: { time: "N/A", rank: null }, Breaststroke: { time: "23.71", rank: 2 }, Butterfly: { time: "20.05", rank: 3 } }
@@ -1086,246 +1156,320 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
             },
             // 9-10 Girls - from top times PDF
             "Salcetti, Avery - Bethesda": {
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
                 ageGroup: "10&U Girls",
+                meets: [],
                 strokes: { Freestyle: { time: "14.52", rank: 1 }, Backstroke: { time: "18.02", rank: 3 }, Breaststroke: { time: "N/A", rank: null }, Butterfly: { time: "15.52", rank: 1 } }
             },
             "Nielsen, Mckinley - Washington Golf": {
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
                 ageGroup: "10&U Girls",
+                meets: [],
                 strokes: { Freestyle: { time: "15.00", rank: 2 }, Backstroke: { time: "18.05", rank: 4 }, Breaststroke: { time: "20.95", rank: 4 }, Butterfly: { time: "16.16", rank: 3 } }
             },
             "Hassan, Madison - Army Navy": {
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
                 ageGroup: "10&U Girls",
+                meets: [],
                 strokes: { Freestyle: { time: "15.25", rank: 3 }, Backstroke: { time: "19.88", rank: 10 }, Breaststroke: { time: "22.18", rank: 8 }, Butterfly: { time: "17.24", rank: 9 } }
             },
             "Donahue, Eily - Edgemoor": {
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
                 ageGroup: "10&U Girls",
+                meets: [],
                 strokes: { Freestyle: { time: "15.26", rank: 4 }, Backstroke: { time: "17.36", rank: 1 }, Breaststroke: { time: "18.97", rank: 1 }, Butterfly: { time: "16.66", rank: 6 } }
             },
             "Hartman, Abigail - Washington Golf": {
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
                 ageGroup: "10&U Girls",
+                meets: [],
                 strokes: { Freestyle: { time: "15.41", rank: 5 }, Backstroke: { time: "17.74", rank: 2 }, Breaststroke: { time: "N/A", rank: null }, Butterfly: { time: "17.49", rank: 11 } }
             },
             "Cocker, Claire - Washington Golf": {
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
                 ageGroup: "10&U Girls",
+                meets: [],
                 strokes: { Freestyle: { time: "15.53", rank: 7 }, Backstroke: { time: "21.25", rank: 17 }, Breaststroke: { time: "19.31", rank: 2 }, Butterfly: { time: "17.14", rank: 7 } }
             },
             "Ruiz de Gamboa, Avery - Kenwood": {
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
                 ageGroup: "10&U Girls",
+                meets: [],
                 strokes: { Freestyle: { time: "16.59", rank: 16 }, Backstroke: { time: "N/A", rank: null }, Breaststroke: { time: "20.11", rank: 3 }, Butterfly: { time: "N/A", rank: null } }
             },
             "Gaffin, Jaclyn - Belle Haven": {
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
                 ageGroup: "10&U Girls",
+                meets: [],
                 strokes: { Freestyle: { time: "16.19", rank: 11 }, Backstroke: { time: "19.31", rank: 8 }, Breaststroke: { time: "21.56", rank: 7 }, Butterfly: { time: "16.01", rank: 2 } }
             },
             // 9-10 Boys - from top times PDF
             "Kouhestani, William - Washington Golf": {
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
                 ageGroup: "10&U Boys",
+                meets: [],
                 strokes: { Freestyle: { time: "14.28", rank: 1 }, Backstroke: { time: "20.23", rank: 12 }, Breaststroke: { time: "21.86", rank: 12 }, Butterfly: { time: "16.15", rank: 3 } }
             },
             "Tropea, Beamish - Kenwood": {
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
                 ageGroup: "10&U Boys",
+                meets: [],
                 strokes: { Freestyle: { time: "14.54", rank: 2 }, Backstroke: { time: "17.27", rank: 2 }, Breaststroke: { time: "22.12", rank: 16 }, Butterfly: { time: "16.15", rank: 3 } }
             },
             "King, Ryan - Congressional": {
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
                 ageGroup: "10&U Boys",
+                meets: [],
                 strokes: { Freestyle: { time: "14.61", rank: 3 }, Backstroke: { time: "17.13", rank: 1 }, Breaststroke: { time: "N/A", rank: null }, Butterfly: { time: "16.77", rank: 6 } }
             },
             "Band, Harrison - Lakewood": {
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
                 ageGroup: "10&U Boys",
+                meets: [],
                 strokes: { Freestyle: { time: "15.24", rank: 6 }, Backstroke: { time: "17.75", rank: 3 }, Breaststroke: { time: "23.30", rank: 22 }, Butterfly: { time: "15.85", rank: 1 } }
             },
             "Edmondson, Austin - Congressional": {
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
                 ageGroup: "10&U Boys",
+                meets: [],
                 strokes: { Freestyle: { time: "15.25", rank: 7 }, Backstroke: { time: "18.22", rank: 4 }, Breaststroke: { time: "17.83", rank: 1 }, Butterfly: { time: "N/A", rank: null } }
             },
             "Conjura, Chase - Belle Haven": {
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
                 ageGroup: "10&U Boys",
+                meets: [],
                 strokes: { Freestyle: { time: "15.84", rank: 12 }, Backstroke: { time: "18.90", rank: 6 }, Breaststroke: { time: "18.09", rank: 2 }, Butterfly: { time: "15.97", rank: 2 } }
             },
             "Aliabadi, Aiden - Avenel": {
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
                 ageGroup: "10&U Boys",
+                meets: [],
                 strokes: { Freestyle: { time: "15.18", rank: 5 }, Backstroke: { time: "19.23", rank: 7 }, Breaststroke: { time: "18.69", rank: 3 }, Butterfly: { time: "17.71", rank: 12 } }
             },
             // 11-12 Girls - from top times PDF
             "Hook, Eleanor - Congressional": {
-                ageGroup: "12&U Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "12&U Girls", meets: [],
                 strokes: { Freestyle: { time: "28.88", rank: 1 }, Backstroke: { time: "32.33", rank: 1 }, Breaststroke: { time: "N/A", rank: null }, Butterfly: { time: "30.33", rank: 1 } }
             },
             "Cauthen, Mary - Chevy Chase": {
-                ageGroup: "12&U Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "12&U Girls", meets: [],
                 strokes: { Freestyle: { time: "29.32", rank: 2 }, Backstroke: { time: "36.91", rank: 7 }, Breaststroke: { time: "40.02", rank: 4 }, Butterfly: { time: "32.01", rank: 3 } }
             },
             "Lee, Madison - Avenel": {
-                ageGroup: "12&U Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "12&U Girls", meets: [],
                 strokes: { Freestyle: { time: "29.62", rank: 3 }, Backstroke: { time: "35.58", rank: 2 }, Breaststroke: { time: "40.17", rank: 5 }, Butterfly: { time: "33.57", rank: 5 } }
             },
             "Radford, Callie - Congressional": {
-                ageGroup: "12&U Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "12&U Girls", meets: [],
                 strokes: { Freestyle: { time: "31.58", rank: 9 }, Backstroke: { time: "35.67", rank: 3 }, Breaststroke: { time: "41.17", rank: 8 }, Butterfly: { time: "36.79", rank: 11 } }
             },
             "Meth, Sophia - Chevy Chase": {
-                ageGroup: "12&U Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "12&U Girls", meets: [],
                 strokes: { Freestyle: { time: "31.27", rank: 8 }, Backstroke: { time: "N/A", rank: null }, Breaststroke: { time: "35.82", rank: 1 }, Butterfly: { time: "34.73", rank: 7 } }
             },
             "Marchica, Marie - Argyle": {
-                ageGroup: "12&U Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "12&U Girls", meets: [],
                 strokes: { Freestyle: { time: "N/A", rank: null }, Backstroke: { time: "N/A", rank: null }, Breaststroke: { time: "37.78", rank: 2 }, Butterfly: { time: "N/A", rank: null } }
             },
             "Winston, Josephine - Bethesda": {
-                ageGroup: "12&U Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "12&U Girls", meets: [],
                 strokes: { Freestyle: { time: "34.47", rank: 22 }, Backstroke: { time: "N/A", rank: null }, Breaststroke: { time: "39.80", rank: 3 }, Butterfly: { time: "N/A", rank: null } }
             },
             "Rozofsky, Sasha - Edgemoor": {
-                ageGroup: "12&U Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "12&U Girls", meets: [],
                 strokes: { Freestyle: { time: "29.90", rank: 4 }, Backstroke: { time: "N/A", rank: null }, Breaststroke: { time: "N/A", rank: null }, Butterfly: { time: "31.26", rank: 2 } }
             },
             // 11-12 Boys - from top times PDF
             "Kottak, Danis - Kenwood": {
-                ageGroup: "12&U Boys",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "12&U Boys", meets: [],
                 strokes: { Freestyle: { time: "27.48", rank: 1 }, Backstroke: { time: "31.04", rank: 1 }, Breaststroke: { time: "37.68", rank: 1 }, Butterfly: { time: "34.62", rank: 5 } }
             },
             "Hartman, Charles - Washington Golf": {
-                ageGroup: "12&U Boys",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "12&U Boys", meets: [],
                 strokes: { Freestyle: { time: "28.02", rank: 2 }, Backstroke: { time: "33.86", rank: 4 }, Breaststroke: { time: "N/A", rank: null }, Butterfly: { time: "30.69", rank: 1 } }
             },
             "Schmitt, Andrew - Kenwood": {
-                ageGroup: "12&U Boys",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "12&U Boys", meets: [],
                 strokes: { Freestyle: { time: "28.87", rank: 3 }, Backstroke: { time: "32.48", rank: 2 }, Breaststroke: { time: "N/A", rank: null }, Butterfly: { time: "34.57", rank: 3 } }
             },
             "Andrews, Evan - Columbia": {
-                ageGroup: "12&U Boys",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "12&U Boys", meets: [],
                 strokes: { Freestyle: { time: "29.05", rank: 4 }, Backstroke: { time: "33.77", rank: 3 }, Breaststroke: { time: "38.72", rank: 2 }, Butterfly: { time: "30.91", rank: 2 } }
             },
             "Friend, Timothy - Washington Golf": {
-                ageGroup: "12&U Boys",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "12&U Boys", meets: [],
                 strokes: { Freestyle: { time: "31.32", rank: 7 }, Backstroke: { time: "38.69", rank: 8 }, Breaststroke: { time: "39.83", rank: 3 }, Butterfly: { time: "36.48", rank: 7 } }
             },
             // 13-14 Girls - from top times PDF
             "Busen, McKinley - Army Navy": {
-                ageGroup: "14&U Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "14&U Girls", meets: [],
                 strokes: { Freestyle: { time: "27.06", rank: 1 }, Backstroke: { time: "32.18", rank: 5 }, Breaststroke: { time: "35.39", rank: 1 }, Butterfly: { time: "29.12", rank: 1 } }
             },
             "Kominski, Harper - Avenel": {
-                ageGroup: "14&U Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "14&U Girls", meets: [],
                 strokes: { Freestyle: { time: "28.76", rank: 2 }, Backstroke: { time: "32.64", rank: 6 }, Breaststroke: { time: "N/A", rank: null }, Butterfly: { time: "31.35", rank: 4 } }
             },
             "Johnson, Alexis - Norbeck": {
-                ageGroup: "14&U Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "14&U Girls", meets: [],
                 strokes: { Freestyle: { time: "28.77", rank: 3 }, Backstroke: { time: "29.85", rank: 1 }, Breaststroke: { time: "41.09", rank: 8 }, Butterfly: { time: "29.40", rank: 2 } }
             },
             "MacIvor, Amelia - Army Navy": {
-                ageGroup: "14&U Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "14&U Girls", meets: [],
                 strokes: { Freestyle: { time: "28.79", rank: 4 }, Backstroke: { time: "30.52", rank: 2 }, Breaststroke: { time: "N/A", rank: null }, Butterfly: { time: "31.74", rank: 6 } }
             },
             "Groves, Charlotte - Congressional": {
-                ageGroup: "14&U Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "14&U Girls", meets: [],
                 strokes: { Freestyle: { time: "29.31", rank: 9 }, Backstroke: { time: "31.94", rank: 3 }, Breaststroke: { time: "42.48", rank: 16 }, Butterfly: { time: "32.48", rank: 9 } }
             },
             "Bon Salle, Francesca - Washington Golf": {
-                ageGroup: "14&U Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "14&U Girls", meets: [],
                 strokes: { Freestyle: { time: "29.88", rank: 13 }, Backstroke: { time: "N/A", rank: null }, Breaststroke: { time: "37.01", rank: 2 }, Butterfly: { time: "32.37", rank: 7 } }
             },
             "Aliabadi, Ava - Avenel": {
-                ageGroup: "14&U Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "14&U Girls", meets: [],
                 strokes: { Freestyle: { time: "30.99", rank: 16 }, Backstroke: { time: "34.33", rank: 10 }, Breaststroke: { time: "37.53", rank: 3 }, Butterfly: { time: "N/A", rank: null } }
             },
             "Roscetti, Natalie - Avenel": {
-                ageGroup: "14&U Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "14&U Girls", meets: [],
                 strokes: { Freestyle: { time: "28.93", rank: 5 }, Backstroke: { time: "36.13", rank: 14 }, Breaststroke: { time: "41.76", rank: 11 }, Butterfly: { time: "29.68", rank: 3 } }
             },
             // 13-14 Boys - from top times PDF
             "Papadopoulos, Frederick - Army Navy": {
-                ageGroup: "14&U Boys",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "14&U Boys", meets: [],
                 strokes: { Freestyle: { time: "26.10", rank: 1 }, Backstroke: { time: "31.96", rank: 5 }, Breaststroke: { time: "32.86", rank: 1 }, Butterfly: { time: "27.55", rank: 1 } }
             },
             "Gravell, Jack - Argyle": {
-                ageGroup: "14&U Boys",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "14&U Boys", meets: [],
                 strokes: { Freestyle: { time: "26.36", rank: 2 }, Backstroke: { time: "29.10", rank: 1 }, Breaststroke: { time: "35.38", rank: 5 }, Butterfly: { time: "31.13", rank: 7 } }
             },
             "Abbott, Timmy - Army Navy": {
-                ageGroup: "14&U Boys",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "14&U Boys", meets: [],
                 strokes: { Freestyle: { time: "27.21", rank: 3 }, Backstroke: { time: "31.68", rank: 4 }, Breaststroke: { time: "39.72", rank: 15 }, Butterfly: { time: "29.14", rank: 2 } }
             },
             "Lu, Will - Bethesda": {
-                ageGroup: "14&U Boys",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "14&U Boys", meets: [],
                 strokes: { Freestyle: { time: "27.84", rank: 9 }, Backstroke: { time: "30.33", rank: 2 }, Breaststroke: { time: "33.87", rank: 3 }, Butterfly: { time: "30.46", rank: 5 } }
             },
             "Rump, Brennan - Columbia": {
-                ageGroup: "14&U Boys",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "14&U Boys", meets: [],
                 strokes: { Freestyle: { time: "27.63", rank: 7 }, Backstroke: { time: "30.79", rank: 3 }, Breaststroke: { time: "N/A", rank: null }, Butterfly: { time: "N/A", rank: null } }
             },
             "Tramonte, Ryan - Washington Golf": {
-                ageGroup: "14&U Boys",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "14&U Boys", meets: [],
                 strokes: { Freestyle: { time: "27.48", rank: 5 }, Backstroke: { time: "34.44", rank: 13 }, Breaststroke: { time: "33.28", rank: 2 }, Butterfly: { time: "31.80", rank: 9 } }
             },
             "Steves, Michael - Washington Golf": {
-                ageGroup: "14&U Boys",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "14&U Boys", meets: [],
                 strokes: { Freestyle: { time: "28.62", rank: 11 }, Backstroke: { time: "32.61", rank: 7 }, Breaststroke: { time: "39.19", rank: 13 }, Butterfly: { time: "30.11", rank: 3 } }
             },
             // 15+ Girls - from top times PDF
             "Denney, Eleanor - Edgemoor": {
-                ageGroup: "15+ Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "15+ Girls", meets: [],
                 strokes: { Freestyle: { time: "26.87", rank: 1 }, Backstroke: { time: "31.15", rank: 3 }, Breaststroke: { time: "40.57", rank: 18 }, Butterfly: { time: "31.25", rank: 12 } }
             },
             "Clattenburg, Hannah - Kenwood": {
-                ageGroup: "15+ Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "15+ Girls", meets: [],
                 strokes: { Freestyle: { time: "26.91", rank: 2 }, Backstroke: { time: "30.56", rank: 2 }, Breaststroke: { time: "N/A", rank: null }, Butterfly: { time: "N/A", rank: null } }
             },
             "Lehman, Haley - Army Navy": {
-                ageGroup: "15+ Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "15+ Girls", meets: [],
                 strokes: { Freestyle: { time: "27.07", rank: 3 }, Backstroke: { time: "N/A", rank: null }, Breaststroke: { time: "N/A", rank: null }, Butterfly: { time: "29.94", rank: 4 } }
             },
             "Douglas, Katherine - Army Navy": {
-                ageGroup: "15+ Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "15+ Girls", meets: [],
                 strokes: { Freestyle: { time: "28.19", rank: 4 }, Backstroke: { time: "29.51", rank: 1 }, Breaststroke: { time: "37.38", rank: 8 }, Butterfly: { time: "28.47", rank: 1 } }
             },
             "Haynes, Emory - Washington Golf": {
-                ageGroup: "15+ Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "15+ Girls", meets: [],
                 strokes: { Freestyle: { time: "29.27", rank: 14 }, Backstroke: { time: "36.64", rank: 24 }, Breaststroke: { time: "34.37", rank: 1 }, Butterfly: { time: "33.62", rank: 21 } }
             },
             "Schwarz, Maren - Washington Golf": {
-                ageGroup: "15+ Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "15+ Girls", meets: [],
                 strokes: { Freestyle: { time: "28.58", rank: 8 }, Backstroke: { time: "N/A", rank: null }, Breaststroke: { time: "35.00", rank: 2 }, Butterfly: { time: "30.90", rank: 7 } }
             },
             "Andrews, Abigail - Columbia": {
-                ageGroup: "15+ Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "15+ Girls", meets: [],
                 strokes: { Freestyle: { time: "N/A", rank: null }, Backstroke: { time: "N/A", rank: null }, Breaststroke: { time: "35.66", rank: 3 }, Butterfly: { time: "31.12", rank: 11 } }
             },
             "Gaskin, Catherine - Kenwood": {
-                ageGroup: "15+ Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "15+ Girls", meets: [],
                 strokes: { Freestyle: { time: "30.01", rank: 19 }, Backstroke: { time: "N/A", rank: null }, Breaststroke: { time: "36.85", rank: 6 }, Butterfly: { time: "29.68", rank: 2 } }
             },
             "Groves, Caitlin - Congressional": {
-                ageGroup: "15+ Girls",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "15+ Girls", meets: [],
                 strokes: { Freestyle: { time: "29.17", rank: 13 }, Backstroke: { time: "32.46", rank: 7 }, Breaststroke: { time: "37.95", rank: 9 }, Butterfly: { time: "29.90", rank: 3 } }
             },
             // 15+ Boys - from top times PDF
             "Sonne, Matthew - Kenwood": {
-                ageGroup: "15+ Boys",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "15+ Boys", meets: [],
                 strokes: { Freestyle: { time: "24.89", rank: 1 }, Backstroke: { time: "28.45", rank: 3 }, Breaststroke: { time: "N/A", rank: null }, Butterfly: { time: "28.92", rank: 9 } }
             },
             "Spencer, Gray - Edgemoor": {
-                ageGroup: "15+ Boys",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "15+ Boys", meets: [],
                 strokes: { Freestyle: { time: "25.01", rank: 2 }, Backstroke: { time: "27.06", rank: 2 }, Breaststroke: { time: "31.99", rank: 3 }, Butterfly: { time: "27.94", rank: 5 } }
             },
             "Roscetti, Nicholas - Avenel": {
-                ageGroup: "15+ Boys",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "15+ Boys", meets: [],
                 strokes: { Freestyle: { time: "25.13", rank: 3 }, Backstroke: { time: "30.66", rank: 11 }, Breaststroke: { time: "35.93", rank: 20 }, Butterfly: { time: "26.72", rank: 2 } }
             },
             "Potter, Noah - Lakewood": {
-                ageGroup: "15+ Boys",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "15+ Boys", meets: [],
                 strokes: { Freestyle: { time: "26.65", rank: 14 }, Backstroke: { time: "26.74", rank: 1 }, Breaststroke: { time: "32.76", rank: 8 }, Butterfly: { time: "25.09", rank: 1 } }
             },
             "Robinson, Mitchell - Army Navy": {
-                ageGroup: "15+ Boys",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "15+ Boys", meets: [],
                 strokes: { Freestyle: { time: "N/A", rank: null }, Backstroke: { time: "N/A", rank: null }, Breaststroke: { time: "29.94", rank: 1 }, Butterfly: { time: "27.50", rank: 4 } }
             },
             "Kominski, Tyler - Avenel": {
-                ageGroup: "15+ Boys",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "15+ Boys", meets: [],
                 strokes: { Freestyle: { time: "N/A", rank: null }, Backstroke: { time: "N/A", rank: null }, Breaststroke: { time: "30.85", rank: 2 }, Butterfly: { time: "29.58", rank: 13 } }
             },
             "Lepre, William - Washington Golf": {
-                ageGroup: "15+ Boys",
+                totalPoints: 0, numMeets: 0, teamTotalPoints: 0, winShare: "0%",
+                ageGroup: "15+ Boys", meets: [],
                 strokes: { Freestyle: { time: "25.16", rank: 4 }, Backstroke: { time: "34.30", rank: 24 }, Breaststroke: { time: "34.21", rank: 14 }, Butterfly: { time: "27.45", rank: 3 } }
             }
         };

@@ -51,7 +51,7 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
             --boys-color: #5fa8a8;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', monospace; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Georgia, 'Times New Roman', serif; }
 
         body {
             background-color: #ffffff;
@@ -108,15 +108,15 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
         }
 
         .logo {
-            font-family: 'Courier New', monospace;
-            font-size: 2rem;
-            font-weight: 900;
-            letter-spacing: 6px;
+            font-family: Georgia, serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 4px;
             color: var(--dark);
             text-transform: uppercase;
-            border: 4px solid var(--dark);
+            border: 3px solid var(--dark);
             display: inline-block;
-            padding: 8px 20px;
+            padding: 10px 24px;
             background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
         }
 
@@ -145,106 +145,75 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
         /* Event Section */
         .event-section {
             background: #fff;
-            border: 2px solid var(--primary);
-            padding: 0;
+            border: 2px solid #ddd;
         }
 
-        .section-header {
-            color: var(--dark);
-            font-size: 0.5rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            padding: 6px;
+        .column-headers {
+            display: grid;
+            grid-template-columns: 80px 1fr 80px;
             background: var(--primary);
-            text-align: center;
+            border-bottom: 2px solid var(--accent);
         }
-        .event-header {
-            color: var(--dark);
-            font-size: 0.7rem;
+        .column-headers span {
+            padding: 8px 10px;
+            font-size: 0.65rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
-            padding: 8px;
+            color: var(--dark);
+            text-align: center;
+            border-right: 1px solid rgba(0,0,0,0.1);
+        }
+        .column-headers span:last-child { border-right: none; }
+
+        .event-header {
+            color: var(--dark);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 10px;
             background: #fff;
             border-bottom: 2px solid var(--secondary);
             text-align: center;
         }
-        .event-header.girls { background: var(--primary); }
-        .event-header.boys { background: var(--secondary); }
-
-        .age-group-label {
-            font-weight: 900;
-        }
+        .event-header.girls { border-bottom-color: var(--girls-color); background: rgba(157, 123, 176, 0.1); }
+        .event-header.boys { border-bottom-color: var(--boys-color); background: rgba(95, 168, 168, 0.1); }
 
         /* Individual Swimmer Cards */
         .swimmer-card {
+            display: grid;
+            grid-template-columns: 80px 1fr 80px;
             background: #fff;
             color: var(--dark);
-            padding: 10px 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
             border-bottom: 1px solid #eee;
         }
         
         .swimmer-card:last-child {
             border-bottom: none;
         }
-        
-        .swimmer-card .rank-badge {
-            flex-shrink: 0;
-        }
-        
-        .swimmer-card .info {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .swimmer-card .time {
-            flex-shrink: 0;
-        }
 
-        .rank-1 {
-            background: var(--light-gold) !important;
-            border-left: 4px solid var(--gold);
-        }
+        .rank-1 { background: var(--light-gold) !important; }
+        .rank-2 { background: var(--light-silver) !important; }
+        .rank-3 { background: var(--light-bronze) !important; }
 
-        .rank-2 {
-            background: var(--light-silver) !important;
-            border-left: 4px solid var(--silver);
-        }
-
-        .rank-3 {
-            background: var(--light-bronze) !important;
-            border-left: 4px solid var(--bronze);
-        }
-
-        /* Record proximity highlight */
-        .near-record {
-            background: #fffacd !important;
-        }
-
-        .record-diff {
-            font-size: 0.55rem;
-            color: var(--gold);
-            font-weight: 600;
-        }
-
-        .time.near-record-time {
-            color: var(--gold);
-            font-weight: 900;
+        .rank-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            border-right: 1px solid #eee;
         }
 
         .rank-badge {
-            width: 24px;
-            height: 24px;
+            width: 32px;
+            height: 32px;
             border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 900;
-            font-size: 0.7rem;
+            font-weight: 700;
+            font-size: 1rem;
             color: #fff;
         }
 
@@ -252,14 +221,36 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
         .rank-2 .rank-badge { background: var(--silver); }
         .rank-3 .rank-badge { background: var(--bronze); }
 
-        .info { 
-            padding-left: 0;
-            min-width: 0;
-            flex: 1;
+        .info-cell {
+            padding: 10px 12px;
+            border-right: 1px solid #eee;
         }
+
+        .time-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            font-family: Georgia, serif;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--dark);
+        }
+
+        /* Record proximity */
+        .near-record .time-cell {
+            color: var(--gold);
+        }
+        .record-diff {
+            font-size: 0.5rem;
+            color: var(--gold);
+            display: block;
+        }
+
         .name { 
+            font-family: Georgia, serif;
             font-weight: 700; 
-            font-size: 0.8rem; 
+            font-size: 0.95rem; 
             display: block;
             line-height: 1.3;
             cursor: pointer;
@@ -268,49 +259,38 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
         .name.girls { color: var(--girls-color); }
         .name.boys { color: var(--boys-color); }
         .name:hover { text-decoration: underline; }
-        .team { 
-            font-size: 0.6rem; 
-            color: #888; 
+        
+        .club { 
+            font-size: 0.65rem; 
+            color: #666; 
             text-transform: uppercase; 
             letter-spacing: 1px;
-            margin-top: 2px;
+            margin-top: 3px;
         }
         
-        .win-share {
-            font-size: 0.5rem;
-            color: #666;
-            background: #f9f9f9;
-            padding: 3px 6px;
-            margin-top: 4px;
-            display: inline-flex;
+        .win-share-row {
+            display: flex;
             align-items: center;
-            gap: 4px;
-            border: 1px solid #e0e0e0;
+            gap: 6px;
+            margin-top: 6px;
         }
-        .win-share-flame { font-size: 0.55rem; }
-        .win-share-label { color: #888; }
-        .win-share-value { color: var(--dark); font-weight: 700; }
-        .win-share-rank {
-            padding: 2px 5px;
-            font-weight: 700;
-            font-size: 0.5rem;
-            margin-left: 2px;
-        }
-        .ws-rank-1 { background: var(--light-gold); color: var(--gold); border: 1px solid var(--gold); }
-        .ws-rank-2 { background: var(--light-silver); color: var(--silver); border: 1px solid var(--silver); }
-        .ws-rank-3 { background: var(--light-bronze); color: var(--bronze); border: 1px solid var(--bronze); }
-        .ws-rank-other { background: #f5f5f5; color: #999; border: 1px solid #ddd; }
-        
-        .time { 
-            font-family: 'Courier New', monospace; 
+        .win-share-flame { font-size: 0.7rem; }
+        .win-share-pct { 
+            font-family: Georgia, serif;
             font-weight: 700; 
-            font-size: 0.85rem; 
+            font-size: 0.8rem;
             color: var(--dark);
-            text-align: right;
-            white-space: nowrap;
-            background: var(--light);
-            padding: 4px 8px;
-            border: 1px solid #ddd;
+        }
+        
+        .ws-rank-label {
+            font-family: Georgia, serif;
+            font-weight: 700;
+            font-size: 0.7rem;
+            color: var(--dark);
+            margin-top: 4px;
+        }
+        .ws-rank-label span {
+            color: var(--girls-color);
         }
 
         /* Empty State */
@@ -875,20 +855,20 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
                 const eventSection = document.createElement('div');
                 eventSection.className = 'event-section';
                 
-                // Add CCSDA STROKE RANK section header
-                const sectionHeader = document.createElement('div');
-                sectionHeader.className = 'section-header';
-                sectionHeader.textContent = 'CCSDA STROKE RANK';
-                eventSection.appendChild(sectionHeader);
+                // Column headers
+                const colHeaders = document.createElement('div');
+                colHeaders.className = 'column-headers';
+                colHeaders.innerHTML = '<span>CCSDA RANKING</span><span>NAME</span><span>TIME</span>';
+                eventSection.appendChild(colHeaders);
                 
+                // Event name header
                 const isGirlsEvent = eventName.startsWith('Girls');
                 const header = document.createElement('div');
                 header.className = `event-header ${isGirlsEvent ? 'girls' : 'boys'}`;
                 header.innerHTML = formatEventHeader(eventName);
                 eventSection.appendChild(header);
 
-                const isGirls = eventName.startsWith('Girls');
-                const genderClass = isGirls ? 'girls' : 'boys';
+                const genderClass = isGirlsEvent ? 'girls' : 'boys';
                 
                 swimmers.forEach(swimmer => {
                     const card = document.createElement('div');
@@ -900,23 +880,6 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
                     }
                     
                     card.className = cardClass;
-                    
-                    const timeDiv = document.createElement('div');
-                    timeDiv.className = 'time';
-                    
-                    if (recordDiff) {
-                        const timeSpan = document.createElement('span');
-                        timeSpan.className = 'near-record-time';
-                        timeSpan.textContent = swimmer.time;
-                        timeDiv.appendChild(timeSpan);
-                        
-                        const diffSpan = document.createElement('span');
-                        diffSpan.className = 'record-diff';
-                        diffSpan.textContent = `(${recordDiff} from record)`;
-                        timeDiv.appendChild(diffSpan);
-                    } else {
-                        timeDiv.textContent = swimmer.time;
-                    }
                     
                     const escapedName = swimmer.name.replace(/'/g, "\\'");
                     const escapedTeam = swimmer.team.replace(/'/g, "\\'");
@@ -931,20 +894,28 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
                     const winShareValue = swimmerData && swimmerData.winShare ? swimmerData.winShare : '0%';
                     const ageGroup = swimmerData ? swimmerData.ageGroup : getAgeGroupFromEvent(eventName);
                     const wsRank = getWinShareRank(swimmerKey, ageGroup);
-                    const wsRankClass = wsRank <= 3 ? `ws-rank-${wsRank}` : 'ws-rank-other';
+                    
+                    // Time with optional record diff
+                    let timeHTML = swimmer.time;
+                    if (recordDiff) {
+                        timeHTML = `${swimmer.time}<span class="record-diff">(${recordDiff} from record)</span>`;
+                    }
                     
                     card.innerHTML = `
+                        <div class="rank-cell">
                         <div class="rank-badge">${swimmer.rank}</div>
-                        <div class="info">
-                            <span class="name ${genderClass}" onclick="showSwimmerAnalytics('${escapedName}', '${escapedTeam}')">${displayName}</span>
-                            <span class="team">${swimmer.team}</span>
-                            <div class="win-share">
-                                <span class="win-share-flame">🔥</span>
-                                <span class="win-share-value">${winShareValue}</span>
-                            </div>
                         </div>
+                        <div class="info-cell">
+                            <span class="name ${genderClass}" onclick="showSwimmerAnalytics('${escapedName}', '${escapedTeam}')">${displayName}</span>
+                            <div class="club">${swimmer.team}</div>
+                            <div class="win-share-row">
+                                <span class="win-share-flame">🔥</span>
+                                <span class="win-share-pct">${winShareValue}</span>
+                            </div>
+                            <div class="ws-rank-label">CCSDA Win Share Rank: <span>#${wsRank}</span></div>
+                        </div>
+                        <div class="time-cell">${timeHTML}</div>
                     `;
-                    card.appendChild(timeDiv);
                     eventSection.appendChild(card);
                 });
 

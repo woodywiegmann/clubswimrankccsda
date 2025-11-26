@@ -65,19 +65,19 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
         /* Navigation Tabs */
         .nav-tabs {
             display: flex;
-            gap: 8px;
-            padding: 8px 15px;
+            justify-content: center;
+            gap: 0;
+            padding: 0;
             background: #fff;
-            border-bottom: 3px solid var(--primary);
             flex-shrink: 0;
         }
 
         .nav-tab {
-            padding: 8px 16px;
+            padding: 12px 20px;
             background: var(--light);
             color: var(--dark);
             text-decoration: none;
-            border: 2px solid var(--primary);
+            border: 3px solid var(--boys-color);
             font-weight: 600;
             font-size: 0.75rem;
             text-transform: uppercase;
@@ -85,12 +85,12 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
         }
 
         .nav-tab:hover {
-            background: var(--primary);
+            background: var(--secondary);
         }
 
         .nav-tab.active {
-            background: var(--accent);
-            border-color: var(--accent);
+            background: var(--secondary);
+            border-color: var(--boys-color);
         }
 
         .premium-badge {
@@ -221,13 +221,13 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
         .rank-text {
             font-family: Georgia, serif;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 1.1rem;
             color: #000;
         }
 
         .rank-medal {
-            font-size: 0.8rem;
-            margin-top: 2px;
+            font-size: 1.2rem;
+            margin-top: 4px;
         }
 
         .info-cell {
@@ -246,10 +246,7 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
             color: var(--dark);
         }
 
-        /* Record proximity */
-        .near-record .time-cell {
-            color: var(--gold);
-        }
+        /* Record proximity - keep time BLACK, only diff text is gold */
         .record-diff {
             font-size: 0.5rem;
             color: var(--gold);
@@ -306,9 +303,9 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
             text-align: center;
         }
         .mascot-area img {
-            max-height: 45px;
-            max-width: 55px;
-            opacity: 0.6; 
+            max-height: 70px;
+            max-width: 80px;
+            opacity: 0.5; 
             font-size: 0.8rem;
             color: var(--dark);
         }
@@ -938,16 +935,11 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
                     const medalEmoji = swimmer.rank === 1 ? '🥇' : swimmer.rank === 2 ? '🥈' : '🥉';
                     
                     // Get mascot image based on team
-                    const mascotMap = {
-                        'Columbia': '🦈', // Shark
-                        'Manor': '👹', // Monster  
-                        'Bethesda': '🐝', // (placeholder)
-                        'Kenwood': '🦁', // (placeholder)
-                        'Chevy Chase': '🏊', // (placeholder)
-                        'Congressional': '🦅', // (placeholder)
-                        'Edgemoor': '🐊', // (placeholder)
+                    const mascotImages = {
+                        'Columbia': '<img src="shark.jpeg" alt="Columbia Sharks">',
+                        'Manor': '<img src="monsters.jpeg" alt="Manor Monsters">',
                     };
-                    const mascot = mascotMap[swimmer.team] || '🏊';
+                    const mascot = mascotImages[swimmer.team] || '';
                     
                     card.innerHTML = `
                         <div class="rank-cell">

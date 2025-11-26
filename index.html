@@ -964,11 +964,11 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
                         <div class="info-cell">
                             <span class="name ${genderClass}" onclick="showSwimmerAnalytics('${escapedName}', '${escapedTeam}')">${displayName}</span>
                             <div class="club">${swimmer.team}</div>
-                            <div class="win-share-row">
-                                <span class="win-share-flame">🔥</span>
-                                <span class="win-share-pct">${winShareValue}</span>
-                            </div>
                             <div class="ws-rank-label">CCSDA Win Share Rank: <span>${wsRank}${wsRank <= 3 ? ['', 'st', 'nd', 'rd'][wsRank] : 'th'}</span></div>
+                            <div class="win-share-row">
+                                <span class="win-share-pct">Win Share: ${winShareValue}</span>
+                                <span class="win-share-flame">🔥</span>
+                            </div>
                             <div class="mascot-area">${mascot}</div>
                         </div>
                         <div class="time-cell">${timeHTML}</div>

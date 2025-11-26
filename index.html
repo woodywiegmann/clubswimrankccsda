@@ -1025,17 +1025,46 @@
                 </div>
             `;
 
-            // Strokes / CCSDA Rankings
+            // Strokes / CCSDA Rankings with Record Delta
             html += `<div class="stat-section"><h3>${data.ageGroup}</h3><div class="event-list">`;
             ['Freestyle', 'Backstroke', 'Breaststroke', 'Butterfly'].forEach(stroke => {
                 const s = data.strokes[stroke];
                 const rankClass = s && s.rank ? `rank-${s.rank}` : '';
                 const rankText = s && s.rank ? `CCSDA Rank ${s.rank}` : 'N/A';
                 const timeText = s ? s.time : 'N/A';
+                
+                // Calculate delta from record
+                let deltaText = '';
+                if (s && s.time && s.time !== 'N/A') {
+                    // Build the record key based on age group and stroke
+                    let recordKey = '';
+                    if (data.ageGroup.includes('8&U')) {
+                        recordKey = (data.ageGroup.includes('Girls') ? 'Girls' : 'Boys') + ' 8 & Under 25 SC Meter ' + stroke;
+                    } else if (data.ageGroup.includes('10&U')) {
+                        recordKey = (data.ageGroup.includes('Girls') ? 'Girls' : 'Boys') + ' 9-10 25 SC Meter ' + stroke;
+                    } else if (data.ageGroup.includes('12&U')) {
+                        recordKey = (data.ageGroup.includes('Girls') ? 'Girls' : 'Boys') + ' 11-12 50 SC Meter ' + stroke;
+                    } else if (data.ageGroup.includes('14&U')) {
+                        recordKey = (data.ageGroup.includes('Girls') ? 'Girls' : 'Boys') + ' 13-14 50 SC Meter ' + stroke;
+                    } else if (data.ageGroup.includes('18&U')) {
+                        recordKey = (data.ageGroup.includes('Girls') ? 'Girls' : 'Boys') + ' 50 SC Meter ' + stroke;
+                    }
+                    
+                    const record = leagueRecords[recordKey];
+                    if (record) {
+                        const swimmerSec = timeToSeconds(s.time);
+                        const recordSec = timeToSeconds(record.toString());
+                        const delta = (swimmerSec - recordSec).toFixed(2);
+                        if (delta <= 1.5) {
+                            deltaText = `<span style="font-size: 0.75rem; color: #90ee90;">(+${delta} from record)</span>`;
+                        }
+                    }
+                }
+                
                 html += `
                     <div class="event-item">
                         <div class="event-name">${stroke}</div>
-                        <div class="event-time">${timeText}</div>
+                        <div class="event-time">${timeText} ${deltaText}</div>
                         <div class="event-rank ${rankClass}">${rankText}</div>
                     </div>
                 `;

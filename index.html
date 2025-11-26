@@ -257,12 +257,11 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
             font-weight: 700;
         }
         .record-diff {
-            font-size: 0.5rem;
+            font-size: 0.45rem;
             color: #000;
             text-align: center;
             margin-top: 2px;
             line-height: 1.1;
-            font-weight: 400;
         }
 
         .name { 
@@ -292,7 +291,6 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
             gap: 6px;
             margin-top: 6px;
         }
-        .win-share-flame { font-size: 0.6rem; }
         .win-share-pct { 
             font-family: Georgia, serif;
             font-weight: 700;
@@ -309,18 +307,18 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
             color: var(--dark);
         }
 
-        /* Team mascot images - bottom right of name cell */
+        /* Team mascot images - top right of name cell */
         .info-cell {
             position: relative;
         }
         .mascot-area {
             position: absolute;
-            right: 5px;
-            bottom: 5px;
+            right: 3px;
+            top: 3px;
         }
         .mascot-area img {
-            max-height: 55px;
-            max-width: 50px;
+            max-height: 50px;
+            max-width: 45px;
             opacity: 0.25; 
             font-size: 0.8rem;
             color: var(--dark);
@@ -968,7 +966,6 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
                             <div class="ws-rank-label">CCSDA Win Share Rank: <span>${wsRank}${wsRank <= 3 ? ['', 'st', 'nd', 'rd'][wsRank] : 'th'}</span></div>
                             <div class="win-share-row">
                                 <span class="win-share-pct">Win Share: ${winShareValue}</span>
-                                <span class="win-share-flame">🔥</span>
                             </div>
                             <div class="mascot-area">${mascot}</div>
                         </div>

@@ -175,26 +175,29 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
 
         .column-headers {
             display: grid;
-            grid-template-columns: 60px 1fr 70px;
+            grid-template-columns: 70px 1fr 90px;
             background: #fff;
             border-bottom: 1px solid #333;
         }
         .column-headers span {
-            padding: 6px 8px;
-            font-size: 0.6rem;
+            padding: 6px 4px;
+            font-size: 0.5rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             color: var(--dark);
             text-align: center;
             border-right: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .column-headers span:last-child { border-right: none; }
 
         /* Individual Swimmer Cards */
         .swimmer-card {
             display: grid;
-            grid-template-columns: 60px 1fr 70px;
+            grid-template-columns: 70px 1fr 90px;
             background: #fff;
             color: var(--dark);
             border-bottom: 1px solid #333;
@@ -237,21 +240,25 @@ TEAMS/CLUBS ABBREVIATIONS (from PDF):
 
         .time-cell {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 10px 8px;
+            padding: 10px 5px;
             font-family: Georgia, serif;
             font-weight: 700;
             font-size: 1.1rem;
             color: var(--dark);
+            text-align: center;
         }
 
         /* Record proximity - keep time BLACK, only diff text is gold */
         .record-diff {
-            font-size: 0.5rem;
+            font-size: 0.45rem;
             color: var(--gold);
             display: block;
             text-align: center;
+            margin-top: 3px;
+            line-height: 1.2;
         }
 
         .name { 
